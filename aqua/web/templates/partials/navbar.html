@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <button type="button" id="sidebarCollapse" class="btn">
+            <i class="bi bi-list"></i>
+        </button>
+        
+        <div class="search-bar">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search for devices, vulnerabilities...">
+        </div>
+
+        <div class="navbar-right">
+            <div class="dropdown notification-dropdown">
+                <button class="btn dropdown-toggle no-arrow" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <ul class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                    <li class="notification-header">
+                        <h6>Notifications</h6>
+                        <a href="#" class="text-muted">Mark all as read</a>
+                    </li>
+                    <div class="notification-body" id="notificationsContainer">
+                        <!-- Notifications will be loaded here -->
+                    </div>
+                    <li class="notification-footer">
+                        <a href="#" class="text-center d-block">View all notifications</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" alt="Profile" class="profile-img-sm">
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear"></i> Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

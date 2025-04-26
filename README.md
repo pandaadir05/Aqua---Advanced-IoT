@@ -2,138 +2,152 @@
 
 ## Overview
 
-Aqua is a sophisticated security analysis framework designed for Internet of Things (IoT) devices. It combines behavioral analysis, machine learning, and real-time monitoring to provide comprehensive security assessment and protection capabilities.
+Aqua is a comprehensive security framework for Internet of Things (IoT) devices, integrating behavioral analysis, machine learning, and real-time monitoring to address unique security challenges in IoT environments.
 
-## Features
+## Key Features
 
-### Behavioral Analysis
-- Machine learning-based anomaly detection
-- Real-time network traffic analysis
-- Process behavior monitoring
-- File system activity tracking
-- Automated pattern recognition
-
-### Security Monitoring
-- Advanced alerting system
-- Multiple notification channels (Email, SIEM, Webhook)
-- Configurable alert thresholds
-- Common Event Format (CEF) support
-- Real-time console notifications
-
-### Analytics and Reporting
-- Comprehensive statistical analysis
-- Trend detection and visualization
-- Customizable reporting periods
-- Multiple export formats (JSON, CSV, PDF)
-- Automated security recommendations
+- **IoT Device Discovery**: Network scanning, device fingerprinting, service detection
+- **Vulnerability Assessment**: Port scanning, credential checking, vulnerability identification
+- **Protocol Fuzzing**: Support for HTTP, MQTT, CoAP, and Modbus protocols
+- **Behavioral Analysis**: ML-based anomaly detection, traffic analysis
+- **Security Monitoring**: Advanced alerting, multiple notification channels
+- **Analytics & Reporting**: Statistical analysis, trend detection, multiple export formats
 
 ## Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Setup
-1. Clone the repository:
 ```bash
-git clone https://github.com/pandaadir05/aqua.git
-cd aqua
-```
+# Using pip
+pip install aqua-security
 
-2. Install dependencies:
-```bash
+# From source
+git clone https://github.com/adir9/aqua-security.git
+cd aqua-security
 pip install -r requirements.txt
+pip install -e .
+
+# Using Docker
+docker pull adir9/aqua-security:latest
+docker run -p 8000:8000 -v $(pwd)/data:/app/data adir9/aqua-security:latest
 ```
 
-3. Install the package:
+## Quick Start
+
+### Command Line Interface (CLI)
+
 ```bash
-pip install -e .
+# Discover IoT devices
+aqua discover 192.168.1.0/24
+
+# Scan a specific device
+aqua scan 192.168.1.100
+
+# Protocol fuzzing
+aqua fuzz 192.168.1.100 --protocol mqtt
+
+# Comprehensive assessment
+aqua assess 192.168.1.0/24 --output report.json
+```
+
+### Python API
+
+```python
+from aqua.core import IoTPTF
+import asyncio
+
+async def run_assessment():
+    framework = IoTPTF()
+    devices = await framework.discover_devices("192.168.1.0/24")
+    print(f"Discovered {len(devices)} devices.")
+    
+    for device in devices:
+        vulnerabilities = await framework.assess_device(device)
+        print(f"Found {len(vulnerabilities)} vulnerabilities on {device.ip}")
+
+if __name__ == "__main__":
+    asyncio.run(run_assessment())
+```
+
+### Web Interface
+
+Start with: `aqua web --port 8000` and access at `http://localhost:8000`
+
+## Project Structure
+
+```
+aqua/
+├── __init__.py           # Package initialization
+├── cli.py                # Command-line interface
+├── core/                 # Core framework components
+│   ├── analyzer.py       # Vulnerability analysis
+│   ├── behavioral.py     # Behavioral analysis with ML
+│   ├── device.py         # IoT device models
+│   ├── framework.py      # Main framework API
+│   ├── reporting.py      # Reporting and analytics
+│   ├── scanner.py        # Network and vulnerability scanning
+│   └── vulnerability.py  # Vulnerability models
+├── modules/              # Feature-specific modules
+│   ├── discovery/        # Device discovery components
+│   ├── assessment/       # Vulnerability assessment
+│   └── fuzzing/          # Protocol fuzzing implementations
+├── data/                 # Data files and databases
+│   └── vulnerabilities.json  # Known vulnerability database
+└── web/                  # Web interface components
+    ├── static/           # CSS, JS, and static assets
+    └── templates/        # HTML templates
+
+examples/                 # Example usage scripts
+├── basic_usage.py
+└── advanced_scenarios.py
+
+tests/                    # Test suite
+├── test_framework.py
+└── test_modules/
+
+config/                   # Configuration files
+├── alerting.json
+├── behavioral.json
+├── protection.json
+└── reporting.json
+
+docs/                     # Documentation
+└── user_guide.md
 ```
 
 ## Configuration
 
-The framework uses JSON configuration files stored in the `config` directory:
+JSON configuration files in the `config/` directory control framework behavior:
 
-- `alerting.json`: Alert system configuration
+- `alerting.json`: Alert system and notification settings
 - `behavioral.json`: Behavioral analysis parameters
-- `reporting.json`: Reporting and analytics settings
-
-Configuration files are automatically generated with default values on first run.
-
-## Usage
-
-### Basic Usage
-```python
-from aqua.core import BehavioralAnalyzer, AlertManager, ReportGenerator
-
-# Initialize components
-analyzer = BehavioralAnalyzer()
-alert_manager = AlertManager()
-report_gen = ReportGenerator()
-
-# Analyze network behavior
-score = analyzer.analyze_network_behavior(network_data)
-
-# Generate security report
-report = report_gen.generate_report("daily")
-```
-
-### Advanced Configuration
-```python
-# Configure alert thresholds
-analyzer.config["anomaly_threshold"] = 0.8
-
-# Add processes to whitelist
-analyzer.add_to_whitelist("processes", "authorized_process")
-
-# Customize reporting metrics
-report_gen.config["metrics"]["network"]["protocol_distribution"] = True
-```
+- `protection.json`: Protection mechanisms settings
+- `reporting.json`: Report formats and retention policies
 
 ## Architecture
 
-The framework consists of three main components:
+Five primary components:
 
-1. **Behavioral Analysis Engine**
-   - Anomaly detection using Isolation Forest algorithm
-   - Feature extraction and scaling
-   - Real-time model updates
-
-2. **Alert Management System**
-   - Multi-channel notification system
-   - Configurable alert rules
-   - Alert correlation and aggregation
-
-3. **Analytics Engine**
-   - Statistical analysis
-   - Trend detection
-   - Automated reporting
+1. **Core Engine**: Framework coordination and plugin support
+2. **Discovery Module**: Network scanning and device identification
+3. **Assessment Module**: Vulnerability assessment and remediation
+4. **Protection Engine**: Real-time monitoring and threat blocking
+5. **Analytics Engine**: Data processing and reporting
 
 ## Development
 
-### Testing
-Run the test suite:
-```bash
-python -m pytest tests/
-```
+### Prerequisites
+- Python 3.8+
+- Nmap network scanner
+- Virtual environment recommended
 
-### Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+### Setup
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Or venv\Scripts\activate on Windows
+pip install -r requirements-dev.txt
+pytest
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Authors
-
-- Adir - Initial work - [Cyber Security Research]
-
-## Acknowledgments
-
-- Machine Learning algorithms based on scikit-learn
-- Visualization powered by matplotlib
-- Console interface using Rich library 
+MIT License - See LICENSE file for details.

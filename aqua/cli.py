@@ -27,12 +27,12 @@ console = Console()
 
 def display_banner():
     banner = """
-    █████╗ ██████╗ ██╗   ██╗ █████╗ 
-    ██╔══██╗██╔══██╗██║   ██║██╔══██╗
-    ███████║██████╔╝██║   ██║███████║
-    ██╔══██║██╔══██╗██║   ██║██╔══██║
-    ██║  ██║██║  ██║╚██████╔╝██║  ██║
-    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝
+    █████╗  ██████╗ ██╗   ██╗ █████╗ 
+    ██╔══██╗██╔═══██╗██║   ██║██╔══██╗
+    ███████║██║   ██║██║   ██║███████║
+    ██╔══██║██║▄▄ ██║██║   ██║██╔══██║
+    ██║  ██║╚██████╔╝╚██████╔╝██║  ██║
+    ╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚═╝  ╚═╝
     """
     version = "[bold cyan]v1.0.0[/bold cyan]"
     tagline = "[bold yellow]Next Generation IoT Security Scanner[/bold yellow]"
@@ -387,4 +387,4 @@ def configure(
     console.print("[green]Configuration saved successfully[/green]")
 
 if __name__ == "__main__":
-    app() 
+    app()

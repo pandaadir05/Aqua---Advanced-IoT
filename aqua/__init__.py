@@ -10,12 +10,14 @@ from .cli import app
 from .core import (
     BehavioralAnalyzer,
     ReportGenerator,
-    AlertManager
+    AlertManager,
+    IoTPTF
 )
 
 __all__ = [
     "app",
     "BehavioralAnalyzer",
     "ReportGenerator",
-    "AlertManager"
-] 
+    "AlertManager",
+    "IoTPTF"
+]

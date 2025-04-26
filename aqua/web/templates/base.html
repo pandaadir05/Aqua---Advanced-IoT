@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Aqua - IoT Security Platform{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dashboard-body">
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3 class="logo-text">AQUA</h3>
+                <small class="text-muted">Security Platform</small>
+            </div>
+            <div class="profile-section">
+                <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" alt="Profile" class="profile-img">
+                <div class="profile-info">
+                    <div class="profile-name">Admin User</div>
+                    <div class="profile-role text-muted">Security Analyst</div>
+                </div>
+            </div>
+            <ul class="list-unstyled components">
+                <li class="{% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                    <a href="/" class="nav-link">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="{% if active_page == 'devices' %}active{% endif %}" id="nav-devices">
+                    <a href="/devices" class="nav-link">
+                        <i class="bi bi-hdd-network"></i> Devices
+                    </a>
+                </li>
+                <li class="{% if active_page == 'vulnerabilities' %}active{% endif %}" id="nav-vulnerabilities">
+                    <a href="/vulnerabilities" class="nav-link">
+                        <i class="bi bi-shield-exclamation"></i> Vulnerabilities
+                    </a>
+                </li>
+                <li class="{% if active_page == 'reports' %}active{% endif %}" id="nav-reports">
+                    <a href="/reports" class="nav-link">
+                        <i class="bi bi-file-earmark-bar-graph"></i> Reports
+                    </a>
+                </li>
+                <li class="sidebar-section">Monitoring</li>
+                <li class="{% if active_page == 'live-activity' %}active{% endif %}" id="nav-live-activity">
+                    <a href="/live-activity" class="nav-link">
+                        <i class="bi bi-activity"></i> Live Activity
+                    </a>
+                </li>
+                <li class="{% if active_page == 'alerts' %}active{% endif %}" id="nav-alerts">
+                    <a href="/alerts" class="nav-link">
+                        <i class="bi bi-bell"></i> Alerts
+                    </a>
+                </li>
+                <li class="sidebar-section">Settings</li>
+                <li class="{% if active_page == 'settings' %}active{% endif %}" id="nav-settings">
+                    <a href="/settings" class="nav-link">
+                        <i class="bi bi-gear"></i> Settings
+                    </a>
+                </li>
+                <li class="{% if active_page == 'help' %}active{% endif %}" id="nav-help">
+                    <a href="/help" class="nav-link">
+                        <i class="bi bi-question-circle"></i> Help & Support
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="theme-toggle">
+                    <i class="bi bi-moon-stars"></i>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                    </div>
+                    <i class="bi bi-brightness-high"></i>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Navigation -->
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    
+                    <div class="search-bar">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Search for devices, vulnerabilities...">
+                    </div>
+
+                    <div class="navbar-right">
+                        <div class="dropdown notification-dropdown">
+                            <button class="btn dropdown-toggle no-arrow" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <ul class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                                <li class="notification-header">
+                                    <h6>Notifications</h6>
+                                    <a href="#" class="text-muted">Mark all as read</a>
+                                </li>
+                                <div class="notification-body" id="notificationsContainer">
+                                    <!-- Notifications will be loaded here -->
+                                </div>
+                                <li class="notification-footer">
+                                    <a href="#" class="text-center d-block">View all notifications</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" alt="Profile" class="profile-img-sm">
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear"></i> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="container-fluid dashboard-container">
+                {% block content %}
+                {% endblock %}
+            </div>
+            
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <div>Aqua IoT Security Platform &copy; 2023</div>
+                <div>Version 1.0.0</div>
+            </footer>
+        </div>
+    </div>
+
+    {% block modals %}{% endblock %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

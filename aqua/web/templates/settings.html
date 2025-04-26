@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Aqua IoT Security Platform{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="dashboard-title">Settings</h1>
+        <p class="text-muted">Configure system and user settings</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <!-- Settings Navigation -->
+        <div class="card dashboard-card">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush settings-nav">
+                    <a href="#general" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="bi bi-gear"></i> General
+                    </a>
+                    <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="bi bi-shield-lock"></i> Security
+                    </a>
+                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="bi bi-bell"></i> Notifications
+                    </a>
+                    <a href="#api" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="bi bi-code-slash"></i> API Access
+                    </a>
+                    <a href="#appearance" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="bi bi-palette"></i> Appearance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9 mb-4">
+        <!-- Settings Content -->
+        <div class="tab-content">
+            <!-- General Settings -->
+            <div class="tab-pane fade show active" id="general">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">General Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="generalSettingsForm">
+                            <div class="mb-3">
+                                <label for="systemName" class="form-label">System Name</label>
+                                <input type="text" class="form-control" id="systemName" value="Aqua IoT Security Platform">
+                            </div>
+                            <div class="mb-3">
+                                <label for="orgName" class="form-label">Organization Name</label>
+                                <input type="text" class="form-control" id="orgName" value="My Organization">
+                            </div>
+                            <div class="mb-3">
+                                <label for="timezone" class="form-label">Timezone</label>
+                                <select class="form-select" id="timezone">
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York" selected>Eastern Time (US & Canada)</option>
+                                    <option value="America/Chicago">Central Time (US & Canada)</option>
+                                    <option value="America/Denver">Mountain Time (US & Canada)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dateFormat" class="form-label">Date Format</label>
+                                <select class="form-select" id="dateFormat">
+                                    <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary accent-bg" id="saveGeneralSettings">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="tab-pane fade" id="security">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Security Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="securitySettingsForm">
+                            <h6 class="mb-3">Authentication</h6>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="twoFactorAuth" checked>
+                                    <label class="form-check-label" for="twoFactorAuth">
+                                        Enable Two-Factor Authentication
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                <input type="number" class="form-control" id="sessionTimeout" min="5" max="1440" value="60">
+                            </div>
+                            <div class="mb-3">
+                                <label for="passwordPolicy" class="form-label">Password Policy</label>
+                                <select class="form-select" id="passwordPolicy">
+                                    <option value="standard">Standard (8+ chars)</option>
+                                    <option value="strong" selected>Strong (12+ chars, mixed case, numbers, symbols)</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="saveSecuritySettings">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="tab-pane fade" id="notifications">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Notification Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="notificationSettingsForm">
+                            <h6 class="mb-3">Email Notifications</h6>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">Enable Email Notifications</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailRecipients" class="form-label">Email Recipients</label>
+                                <input type="text" class="form-control" id="emailRecipients" value="admin@example.com" placeholder="Comma-separated email addresses">
+                            </div>
+                            <button type="button" class="btn btn-primary" id="saveNotificationSettings">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Access -->
+            <div class="tab-pane fade" id="api">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">API Access</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>API Status</h6>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="apiEnabled" checked>
+                                <label class="form-check-label" for="apiEnabled">Enable API Access</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6>API Keys</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Key ID</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Default API Key</td>
+                                            <td>aqu_123456789abcdef</td>
+                                            <td>Oct 15, 2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary">Regenerate</button>
+                                                <button class="btn btn-sm btn-outline-danger">Revoke</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2">
+                                <i class="bi bi-plus"></i> Create New API Key
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance Settings -->
+            <div class="tab-pane fade" id="appearance">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Appearance Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="appearanceSettingsForm">
+                            <h6 class="mb-3">Theme</h6>
+                            <div class="mb-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="themeMode" id="lightMode" value="light">
+                                    <label class="form-check-label" for="lightMode">Light Mode</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="themeMode" id="darkMode" value="dark">
+                                    <label class="form-check-label" for="darkMode">Dark Mode</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="themeMode" id="systemMode" value="system" checked>
+                                    <label class="form-check-label" for="systemMode">Use System Setting</label>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mb-3 mt-4">Accent Color</h6>
+                            <div class="mb-3">
+                                <div class="d-flex" style="gap: 10px;">
+                                    <div class="color-option" style="background-color: #2c7be5;"></div>
+                                    <div class="color-option" style="background-color: #6b5eae;"></div>
+                                    <div class="color-option" style="background-color: #00b274;"></div>
+                                    <div class="color-option" style="background-color: #fd7e14;"></div>
+                                    <div class="color-option" style="background-color: #02a8b5;"></div>
+                                </div>
+                                <small class="text-muted d-block mt-2">Click on a color to preview and apply it as your accent color.</small>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="saveAppearanceSettings">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle settings tab navigation
+        const tabLinks = document.querySelectorAll('.settings-nav .list-group-item');
+        
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                tabLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Handle theme selection
+        const themeRadios = document.querySelectorAll('input[name="themeMode"]');
+        const currentTheme = localStorage.getItem('theme');
+        
+        // Set the initial radio button state based on current theme
+        if (currentTheme === 'dark') {
+            document.getElementById('darkMode').checked = true;
+        } else if (currentTheme === 'light') {
+            document.getElementById('lightMode').checked = true;
+        } else {
+            document.getElementById('systemMode').checked = true;
+        }
+        
+        // Add event listeners to radio buttons
+        themeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    document.getElementById('darkModeToggle').checked = true;
+                } else if (this.value === 'light') {
+                    document.body.classList.remove('dark-theme');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    document.getElementById('darkModeToggle').checked = false;
+                } else {
+                    // Use system preference
+                    localStorage.removeItem('theme');
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.body.classList.toggle('dark-theme', prefersDark);
+                    document.documentElement.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+                    document.getElementById('darkModeToggle').checked = prefersDark;
+                }
+            });
+        });
+        
+        // Handle accent color selection
+        const colorOptions = document.querySelectorAll('.color-option');
+        const savedAccentColor = localStorage.getItem('accentColor') || '#2c7be5';
+        
+        colorOptions.forEach(option => {
+            const bgColor = getComputedStyle(option).backgroundColor;
+            const hexColor = rgbToHex(bgColor);
+            
+            // Set initial active state
+            if (hexColor.toLowerCase() === savedAccentColor.toLowerCase()) {
+                option.style.border = '2px solid var(--color-text-primary)';
+            }
+            
+            option.addEventListener('click', function() {
+                // Reset borders
+                colorOptions.forEach(opt => opt.style.border = '2px solid transparent');
+                // Set active border
+                this.style.border = '2px solid var(--color-text-primary)';
+                
+                // Get color and apply it
+                const bgColor = getComputedStyle(this).backgroundColor;
+                const hexColor = rgbToHex(bgColor);
+                localStorage.setItem('accentColor', hexColor);
+                
+                // Apply the new color (using the function from common.js)
+                if (typeof applyAccentColor === 'function') {
+                    applyAccentColor(hexColor);
+                }
+            });
+        });
+        
+        // Helper function to convert RGB to Hex
+        function rgbToHex(rgb) {
+            if (rgb.startsWith('#')) return rgb;
+            
+            const matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+            if (!matches) return '#2c7be5';
+            
+            function componentToHex(c) {
+                const hex = parseInt(c).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }
+            
+            return '#' + componentToHex(matches[1]) + componentToHex(matches[2]) + componentToHex(matches[3]);
+        }
+        
+        // Save button handlers
+        document.getElementById('saveGeneralSettings').addEventListener('click', function() {
+            showToast('General settings saved successfully!', 'success');
+        });
+        
+        document.getElementById('saveSecuritySettings').addEventListener('click', function() {
+            showToast('Security settings saved successfully!', 'success');
+        });
+        
+        document.getElementById('saveNotificationSettings').addEventListener('click', function() {
+            showToast('Notification settings saved successfully!', 'success');
+        });
+        
+        document.getElementById('saveAppearanceSettings').addEventListener('click', function() {
+            showToast('Appearance settings saved successfully!', 'success');
+        });
+    });
+</script>
+{% endblock %}

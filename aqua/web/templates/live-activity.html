@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Live Activity - Aqua IoT Security Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom styles for Live Activity page */
+    .event-log {
+        height: 400px;
+        overflow-y: auto;
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--color-border);
+        border-radius: 0.5rem;
+    }
+    
+    .event-item {
+        display: flex;
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    .event-item:last-child {
+        border-bottom: none;
+    }
+    
+    .event-time {
+        width: 80px;
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+    }
+    
+    .event-icon {
+        margin-right: 10px;
+        width: 24px;
+        text-align: center;
+    }
+    
+    .event-item.event-error .event-icon {
+        color: var(--red);
+    }
+    
+    .event-item.event-warning .event-icon {
+        color: var(--yellow);
+    }
+    
+    .event-item.event-info .event-icon {
+        color: var(--blue);
+    }
+    
+    .event-content {
+        flex: 1;
+    }
+    
+    .event-message {
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="dashboard-title">Live Activity Monitor</h1>
+        <p class="text-muted">Real-time monitoring of network and device activities</p>
+    </div>
+    <div class="col-auto">
+        <div class="dashboard-actions">
+            <div class="form-check form-switch d-inline-block me-3 mt-2">
+                <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                <label class="form-check-label" for="autoRefreshToggle">Auto Refresh</label>
+            </div>
+            <button class="btn btn-outline-secondary me-2" id="refreshButton">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="viewOptionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    View Options
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="viewOptionsDropdown">
+                    <li><h6 class="dropdown-header">Time Range</h6></li>
+                    <li><a class="dropdown-item time-range-option active" href="#" data-range="5">Last 5 minutes</a></li>
+                    <li><a class="dropdown-item time-range-option" href="#" data-range="15">Last 15 minutes</a></li>
+                    <li><a class="dropdown-item time-range-option" href="#" data-range="60">Last hour</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Monitor -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">Network Traffic Monitor</h5>
+                <div class="card-actions">
+                    <span class="badge bg-success pulse-animation">Live</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="networkTrafficChart" class="chart-container" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">Active Connections</h5>
+                <div class="card-actions">
+                    <span class="badge bg-primary" id="connectionsCount">12</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="height: 300px; overflow-y: auto;">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Destination</th>
+                                <th>Protocol</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody id="connectionsTable">
+                            <tr>
+                                <td>192.168.1.101</td>
+                                <td>192.168.1.1</td>
+                                <td>TCP</td>
+                                <td>ESTABLISHED</td>
+                            </tr>
+                            <tr>
+                                <td>192.168.1.105</td>
+                                <td>8.8.8.8</td>
+                                <td>UDP</td>
+                                <td>ESTABLISHED</td>
+                            </tr>
+                            <tr>
+                                <td>192.168.1.104</td>
+                                <td>192.168.1.1</td>
+                                <td>TCP</td>
+                                <td>ESTABLISHED</td>
+                            </tr>
+                            <tr>
+                                <td>192.168.1.102</td>
+                                <td>192.168.1.103</td>
+                                <td>TCP</td>
+                                <td>ESTABLISHED</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Log and Device Status -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">Live Event Log</h5>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-outline-secondary me-2" id="clearLogBtn">
+                        Clear Log
+                    </button>
+                    <div class="form-check form-switch d-inline-block">
+                        <input class="form-check-input" type="checkbox" id="autoscrollToggle" checked>
+                        <label class="form-check-label" for="autoscrollToggle">Auto-scroll</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="eventLog" class="event-log p-2">
+                    <div class="event-item event-warning">
+                        <div class="event-time">11:42:15</div>
+                        <div class="event-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <div class="event-content">
+                            <div class="event-message">Unusual traffic detected from 192.168.1.101</div>
+                            <div class="event-details text-muted small">Excessive outbound connections</div>
+                        </div>
+                    </div>
+                    <div class="event-item event-info">
+                        <div class="event-time">11:38:02</div>
+                        <div class="event-icon"><i class="bi bi-info-circle-fill"></i></div>
+                        <div class="event-content">
+                            <div class="event-message">Device 192.168.1.105 connected to the network</div>
+                            <div class="event-details text-muted small">MAC: AA:BB:CC:DD:EE:FF</div>
+                        </div>
+                    </div>
+                    <div class="event-item event-error">
+                        <div class="event-time">11:35:47</div>
+                        <div class="event-icon"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                        <div class="event-content">
+                            <div class="event-message">Authentication failure on device 192.168.1.104</div>
+                            <div class="event-details text-muted small">Multiple failed login attempts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">Device Status</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="deviceStatusList">
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Security Camera</h6>
+                                <small class="text-muted">192.168.1.101</small>
+                            </div>
+                            <span class="badge bg-success">online</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>CPU</span>
+                                <span>45%</span>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 45%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Smart Speaker</h6>
+                                <small class="text-muted">192.168.1.102</small>
+                            </div>
+                            <span class="badge bg-success">online</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>CPU</span>
+                                <span>12%</span>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 12%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize network traffic chart
+        const options = {
+            series: [
+                {
+                    name: 'Network Traffic (Mbps)',
+                    data: [35, 41, 62, 42, 13, 18, 29, 37, 36, 51, 32, 35]
+                },
+                {
+                    name: 'Packet Loss (%)',
+                    data: [0, 1, 0, 2, 3, 1, 0, 0, 1, 2, 1, 0]
+                }
+            ],
+            chart: {
+                height: 300,
+                type: 'line',
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: [3, 2]
+            },
+            colors: ['#2c7be5', '#e63757'],
+            xaxis: {
+                categories: ['12:05', '12:10', '12:15', '12:20', '12:25', '12:30', '12:35', '12:40', '12:45', '12:50', '12:55', '13:00']
+            },
+            yaxis: [
+                {
+                    title: {
+                        text: 'Network Traffic (Mbps)'
+                    }
+                },
+                {
+                    opposite: true,
+                    title: {
+                        text: 'Packet Loss (%)'
+                    }
+                }
+            ]
+        };
+
+        const chart = new ApexCharts(document.getElementById('networkTrafficChart'), options);
+        chart.render();
+
+        // Set up event handlers
+        document.getElementById('refreshButton').addEventListener('click', function() {
+            // In a real app, this would refresh the data
+            alert('Data refreshed');
+        });
+
+        document.getElementById('clearLogBtn').addEventListener('click', function() {
+            document.getElementById('eventLog').innerHTML = '';
+        });
+    });
+</script>
+{% endblock %}

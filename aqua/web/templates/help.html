@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - Aqua IoT Security Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dashboard-body">
+    <div class="wrapper">
+        <!-- Include sidebar -->
+        {% include 'partials/sidebar.html' %}
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Navigation -->
+            {% include 'partials/navbar.html' %}
+
+            <!-- Main Content -->
+            <div class="container-fluid dashboard-container">
+                <div class="row mb-4">
+                    <div class="col">
+                        <h1 class="dashboard-title">Help & Support</h1>
+                        <p class="text-muted">Get help with using the Aqua IoT Security Platform</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dashboard-actions">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactSupportModal">
+                                <i class="bi bi-headset"></i> Contact Support
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <!-- Help Navigation -->
+                    <div class="col-md-3 mb-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="card-title">Help Topics</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush help-topics">
+                                    <a href="#getting-started" class="list-group-item list-group-item-action active">
+                                        Getting Started
+                                    </a>
+                                    <a href="#device-management" class="list-group-item list-group-item-action">
+                                        Device Management
+                                    </a>
+                                    <a href="#vulnerability-scanning" class="list-group-item list-group-item-action">
+                                        Vulnerability Scanning
+                                    </a>
+                                    <a href="#alerts-notifications" class="list-group-item list-group-item-action">
+                                        Alerts & Notifications
+                                    </a>
+                                    <a href="#reports" class="list-group-item list-group-item-action">
+                                        Reports
+                                    </a>
+                                    <a href="#settings-config" class="list-group-item list-group-item-action">
+                                        Settings & Configuration
+                                    </a>
+                                    <a href="#api-reference" class="list-group-item list-group-item-action">
+                                        API Reference
+                                    </a>
+                                    <a href="#troubleshooting" class="list-group-item list-group-item-action">
+                                        Troubleshooting
+                                    </a>
+                                    <a href="#faq" class="list-group-item list-group-item-action">
+                                        FAQ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Info Card -->
+                        <div class="card dashboard-card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title">Contact Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled contact-info">
+                                    <li>
+                                        <i class="bi bi-envelope me-2"></i>
+                                        <a href="mailto:support@aquasecurity.com">support@aquasecurity.com</a>
+                                    </li>
+                                    <li class="mt-2">
+                                        <i class="bi bi-telephone me-2"></i>
+                                        <a href="tel:+18001234567">+1 (800) 123-4567</a>
+                                    </li>
+                                    <li class="mt-2">
+                                        <i class="bi bi-chat-dots me-2"></i>
+                                        <a href="#" id="liveChatBtn">Start Live Chat</a>
+                                    </li>
+                                </ul>
+                                <hr>
+                                <div class="support-hours">
+                                    <h6>Support Hours</h6>
+                                    <p class="mb-0">Monday - Friday</p>
+                                    <p>8:00 AM - 8:00 PM EST</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Help Content -->
+                    <div class="col-md-9">
+                        <div class="tab-content">
+                            <!-- Getting Started -->
+                            <div class="tab-pane fade show active" id="getting-started">
+                                <div class="card dashboard-card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Getting Started with Aqua</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Welcome to Aqua IoT Security Platform</h4>
+                                        <p>
+                                            Aqua is a comprehensive security platform designed to protect your IoT devices from various threats. 
+                                            This guide will help you get started with the platform and make the most of its features.
+                                        </p>
+
+                                        <h5 class="mt-4">Step 1: Set up your environment</h5>
+                                        <p>
+                                            Before you begin using Aqua, ensure that you have completed the installation and configuration steps:
+                                        </p>
+                                        <ul>
+                                            <li>Install the required dependencies</li>
+                                            <li>Configure network settings</li>
+                                            <li>Set up user accounts and permissions</li>
+                                        </ul>
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            For detailed installation instructions, refer to the <a href="#">Installation Guide</a>.
+                                        </div>
+
+                                        <h5 class="mt-4">Step 2: Discover devices</h5>
+                                        <p>
+                                            The first task is to discover IoT devices on your network:
+                                        </p>
+                                        <ol>
+                                            <li>Navigate to the <strong>Devices</strong> page</li>
+                                            <li>Click on the <strong>Add Device</strong> button</li>
+                                            <li>Select <strong>Auto-Discover</strong> to scan your network</li>
+                                            <li>Alternatively, manually add devices by providing their details</li>
+                                        </ol>
+
+                                        <h5 class="mt-4">Step 3: Run your first scan</h5>
+                                        <p>
+                                            Once you've added your devices, it's time to run a security scan:
+                                        </p>
+                                        <ol>
+                                            <li>Go to the <strong>Dashboard</strong> page</li>
+                                            <li>Click on the <strong>New Scan</strong> button</li>
+                                            <li>Select the target network or specific devices</li>
+                                            <li>Choose the scan type (Quick or Full)</li>
+                                            <li>Click <strong>Start Scan</strong> to begin</li>
+                                        </ol>
+
+                                        <h5 class="mt-4">Step 4: Review results and take action</h5>
+                                        <p>
+                                            After the scan completes, you'll be able to review the results:
+                                        </p>
+                                        <ul>
+                                            <li>Check the <strong>Vulnerabilities</strong> page to see identified security issues</li>
+                                            <li>Set up alerts for critical issues</li>
+                                            <li>Generate reports for your team</li>
+                                            <li>Implement recommended remediation steps</li>
+                                        </ul>
+
+                                        <h5 class="mt-4">Video Tutorials</h5>
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6>Quick Start Tutorial</h6>
+                                                        <p class="small">Learn how to set up Aqua in less than 10 minutes</p>
+                                                        <button class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-play-fill"></i> Watch Video
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6>Advanced Features</h6>
+                                                        <p class="small">Dive deeper into Aqua's advanced capabilities</p>
+                                                        <button class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-play-fill"></i> Watch Video
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mt-4">Additional Resources</h5>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="resource-card">
+                                                    <i class="bi bi-journal-text resource-icon"></i>
+                                                    <h6>User Manual</h6>
+                                                    <p class="small">Complete documentation for Aqua platform</p>
+                                                    <a href="#" class="btn btn-sm btn-link">Read Manual</a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="resource-card">
+                                                    <i class="bi bi-code-square resource-icon"></i>
+                                                    <h6>API Documentation</h6>
+                                                    <p class="small">Integrate with the Aqua API</p>
+                                                    <a href="#" class="btn btn-sm btn-link">View API Docs</a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="resource-card">
+                                                    <i class="bi bi-people resource-icon"></i>
+                                                    <h6>Community Forum</h6>
+                                                    <p class="small">Join discussions with other users</p>
+                                                    <a href="#" class="btn btn-sm btn-link">Visit Forum</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FAQ Section -->
+                            <div class="tab-pane fade" id="faq">
+                                <div class="card dashboard-card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Frequently Asked Questions</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="accordion" id="faqAccordion">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne">
+                                                        How do I scan my network for IoT devices?
+                                                    </button>
+                                                </h2>
+                                                <div id="faqOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                                    <div class="accordion-body">
+                                                        <p>To scan your network for IoT devices, navigate to the <strong>Devices</strong> page and click the <strong>Scan Network</strong> button in the top-right corner. Enter your network range (e.g., 192.168.1.0/24) and select the scan type.</p>
+                                                        <p>The scan will begin and display all discovered devices once complete.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo">
+                                                        How do I generate security reports?
+                                                    </button>
+                                                </h2>
+                                                <div id="faqTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                    <div class="accordion-body">
+                                                        <p>To generate security reports, navigate to the <strong>Reports</strong> page and click the <strong>New Report</strong> button. Select the report type, specify the parameters, and click <strong>Generate Report</strong>.</p>
+                                                        <p>You can also schedule recurring reports by clicking the <strong>Schedule</strong> button.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree">
+                                                        How do I configure alert notifications?
+                                                    </button>
+                                                </h2>
+                                                <div id="faqThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                    <div class="accordion-body">
+                                                        <p>To configure alert notifications, go to the <strong>Settings</strong> page and select the <strong>Notifications</strong> tab. Enable the notification methods you prefer (email, SMS, webhooks) and specify the recipients.</p>
+                                                        <p>You can customize which types of alerts trigger notifications by adjusting the alert severity thresholds.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            {% include 'partials/footer.html' %}
+        </div>
+    </div>
+
+    <!-- Contact Support Modal -->
+    <div class="modal fade" id="contactSupportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contact Support</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supportForm">
+                        <div class="mb-3">
+                            <label for="supportSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="supportSubject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportCategory" class="form-label">Category</label>
+                            <select class="form-select" id="supportCategory" required>
+                                <option value="">Select category</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="account">Account Management</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportPriority" class="form-label">Priority</label>
+                            <select class="form-select" id="supportPriority" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="supportMessage" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportAttachment" class="form-label">Attachment (optional)</label>
+                            <input class="form-control" type="file" id="supportAttachment">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitSupportBtn">Submit Ticket</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Chat Widget (would be implemented with a third party service in production) -->
+    <div id="liveChatWidget" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 350px; height: 400px; z-index: 9999;">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span>Live Chat</span>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" id="closeChatBtn"></button>
+            </div>
+            <div class="card-body bg-light p-2" style="height: 300px; overflow-y: auto;">
+                <div class="chat-messages">
+                    <div class="chat-message system">
+                        <div class="message-content">
+                            Welcome to Aqua Support Chat! An agent will join you shortly.
+                        </div>
+                        <div class="message-time small text-muted">Just now</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Type your message..." id="chatMessageInput">
+                    <button class="btn btn-primary" type="button" id="sendChatBtn"><i class="bi bi-send"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/help.js"></script>
+</body>
+</html>

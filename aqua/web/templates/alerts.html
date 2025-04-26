@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts - Aqua IoT Security Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dashboard-body">
+    <div class="wrapper">
+        <!-- Include sidebar -->
+        {% include 'partials/sidebar.html' %}
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Navigation -->
+            {% include 'partials/navbar.html' %}
+
+            <!-- Main Content -->
+            <div class="container-fluid dashboard-container">
+                <div class="row mb-4">
+                    <div class="col">
+                        <h1 class="dashboard-title">Security Alerts</h1>
+                        <p class="text-muted">Manage and respond to security incidents</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dashboard-actions">
+                            <button class="btn btn-outline-secondary me-2" id="refreshAlertsBtn">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                            <div class="dropdown d-inline-block me-2">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="alertFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i> Filter
+                                </button>
+                                <div class="dropdown-menu p-3" style="width: 300px;">
+                                    <h6 class="dropdown-header">Filter Alerts</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Alert Severity</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="criticalFilter" checked>
+                                            <label class="form-check-label" for="criticalFilter">Critical</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="highFilter" checked>
+                                            <label class="form-check-label" for="highFilter">High</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="mediumFilter" checked>
+                                            <label class="form-check-label" for="mediumFilter">Medium</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="lowFilter" checked>
+                                            <label class="form-check-label" for="lowFilter">Low</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Time Range</label>
+                                        <select class="form-select form-select-sm" id="timeRangeSelect">
+                                            <option value="day">Last 24 hours</option>
+                                            <option value="week" selected>Last 7 days</option>
+                                            <option value="month">Last 30 days</option>
+                                            <option value="all">All time</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Alert Status</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="openFilter" checked>
+                                            <label class="form-check-label" for="openFilter">Open</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="inProgressFilter" checked>
+                                            <label class="form-check-label" for="inProgressFilter">In Progress</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="resolvedFilter">
+                                            <label class="form-check-label" for="resolvedFilter">Resolved</label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary" id="applyFiltersBtn">Apply Filters</button>
+                                        <button class="btn btn-sm btn-outline-secondary" id="resetFiltersBtn">Reset</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-card-body">
+                                <div class="stat-card-icon red">
+                                    <i class="bi bi-exclamation-octagon"></i>
+                                </div>
+                                <div class="stat-card-info">
+                                    <div class="stat-card-value" id="criticalAlertsCount">3</div>
+                                    <div class="stat-card-title">Critical Alerts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-card-body">
+                                <div class="stat-card-icon orange">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </div>
+                                <div class="stat-card-info">
+                                    <div class="stat-card-value" id="highAlertsCount">8</div>
+                                    <div class="stat-card-title">High Alerts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-card-body">
+                                <div class="stat-card-icon yellow">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                </div>
+                                <div class="stat-card-info">
+                                    <div class="stat-card-value" id="mediumAlertsCount">14</div>
+                                    <div class="stat-card-title">Medium Alerts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-card-body">
+                                <div class="stat-card-icon blue">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="stat-card-info">
+                                    <div class="stat-card-value" id="lowAlertsCount">22</div>
+                                    <div class="stat-card-title">Low Alerts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Lists -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="card-title">Security Alerts</h5>
+                                <div class="card-actions">
+                                    <div class="input-group search-input">
+                                        <input type="text" class="form-control" id="alertSearch" placeholder="Search alerts...">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchAlertsBtn">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover alerts-table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 20px;"></th>
+                                                <th>Alert</th>
+                                                <th>Device</th>
+                                                <th>Severity</th>
+                                                <th>Status</th>
+                                                <th>Time</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="alertsTable">
+                                            <!-- Will be populated dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <nav aria-label="Alerts pagination">
+                                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Trends -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="card-title">Alert Trends</h5>
+                                <div class="card-actions">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary active">Week</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Month</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Quarter</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="alertTrendsChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="card-title">Alert Categories</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="alertCategoriesChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            {% include 'partials/footer.html' %}
+        </div>
+    </div>
+
+    <!-- Alert Detail Modal -->
+    <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Alert Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-detail-header mb-4">
+                        <div class="alert-severity-badge" id="alertDetailSeverity">
+                            <i class="bi bi-exclamation-triangle me-2"></i> Critical
+                        </div>
+                        <h4 id="alertDetailTitle">Unauthorized Access Attempt</h4>
+                        <div class="alert-meta">
+                            <span><i class="bi bi-clock me-1"></i> <span id="alertDetailTime">Nov 2, 2023 14:28:05</span></span>
+                            <span class="ms-3"><i class="bi bi-hdd me-1"></i> <span id="alertDetailDevice">Camera (192.168.1.101)</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h6>Description</h6>
+                            <p id="alertDetailDescription">Multiple failed login attempts detected on the device from IP address 192.168.1.35.</p>
+                            
+                            <h6 class="mt-3">Technical Details</h6>
+                            <pre id="alertDetailTechnical" class="alert-technical-details">
+{
+  "source_ip": "192.168.1.35",
+  "destination_ip": "192.168.1.101",
+  "destination_port": 22,
+  "protocol": "SSH",
+  "attempts": 5,
+  "usernames": ["admin", "root"],
+  "timestamp": "2023-11-02T14:28:05Z"
+}
+                            </pre>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert-status-panel mb-3">
+                                <h6>Status</h6>
+                                <select class="form-select" id="alertDetailStatus">
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="False Positive">False Positive</option>
+                                </select>
+                            </div>
+                            
+                            <div class="alert-assigned-panel mb-3">
+                                <h6>Assigned To</h6>
+                                <select class="form-select" id="alertDetailAssigned">
+                                    <option value="">Unassigned</option>
+                                    <option value="admin">Admin User</option>
+                                    <option value="john">John Smith</option>
+                                    <option value="sarah">Sarah Johnson</option>
+                                </select>
+                            </div>
+                            
+                            <div class="alert-actions-panel">
+                                <h6>Quick Actions</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-sm btn-danger">Block Source IP</button>
+                                    <button class="btn btn-sm btn-warning">Quarantine Device</button>
+                                    <button class="btn btn-sm btn-info">Investigate Further</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-notes-panel mb-3">
+                        <h6>Notes</h6>
+                        <textarea class="form-control" id="alertDetailNotes" rows="3" placeholder="Add your notes here..."></textarea>
+                    </div>
+                    
+                    <div class="alert-timeline">
+                        <h6>Timeline</h6>
+                        <div class="alert-timeline-items" id="alertDetailTimeline">
+                            <div class="timeline-item">
+                                <div class="timeline-indicator"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-time">Nov 2, 2023 14:28:05</div>
+                                    <div class="timeline-title">Alert Generated</div>
+                                    <div class="timeline-description">Alert was automatically generated by the system</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-indicator"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-time">Nov 2, 2023 14:30:12</div>
+                                    <div class="timeline-title">Status Changed</div>
+                                    <div class="timeline-description">Status changed from 'Open' to 'In Progress' by Admin User</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveAlertBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/alerts.js"></script>
+</body>
+</html>
