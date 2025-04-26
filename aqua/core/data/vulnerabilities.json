@@ -1,0 +1,26 @@
+{
+    "CVE-2023-1234": {
+        "name": "Outdated OpenSSH Version",
+        "severity": "High",
+        "description": "OpenSSH version before 7.9 contains multiple vulnerabilities",
+        "affected_services": ["ssh"],
+        "cvss_score": 8.0,
+        "remediation": "Update OpenSSH to version 7.9 or later"
+    },
+    "CVE-2023-1235": {
+        "name": "Weak SSL/TLS Configuration",
+        "severity": "Medium",
+        "description": "Server uses weak SSL/TLS cipher suites",
+        "affected_services": ["https"],
+        "cvss_score": 6.5,
+        "remediation": "Update SSL/TLS configuration to use strong cipher suites"
+    },
+    "CVE-2023-1236": {
+        "name": "Default Credentials",
+        "severity": "Critical",
+        "description": "Device uses default administrator credentials",
+        "affected_services": ["http", "https", "ssh"],
+        "cvss_score": 9.8,
+        "remediation": "Change default credentials immediately"
+    }
+} 
