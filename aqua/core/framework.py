@@ -1,5 +1,5 @@
 """
-Core framework class for IoT Penetration Testing Framework.
+Core framework class for Aqua - Advanced IoT Security Analysis Framework.
 """
 
 from typing import List, Dict, Optional
@@ -11,12 +11,12 @@ from ..modules.fuzzing import ProtocolFuzzer
 from ..core.device import IoTDevice
 from ..core.vulnerability import Vulnerability
 
-class IoTPTF:
-    """Main framework class for IoT penetration testing."""
+class Aqua:
+    """Main framework class for IoT security analysis."""
     
     def __init__(self, config: Optional[Dict] = None):
         """
-        Initialize the IoTPTF framework.
+        Initialize the Aqua framework.
         
         Args:
             config: Optional configuration dictionary
@@ -29,7 +29,7 @@ class IoTPTF:
     
     def _setup_logging(self):
         """Configure logging for the framework."""
-        logger.add("iotptf.log", rotation="1 day", retention="7 days")
+        logger.add("aqua.log", rotation="1 day", retention="7 days")
     
     async def discover_devices(self, network: str) -> List[IoTDevice]:
         """
@@ -109,4 +109,7 @@ class IoTPTF:
                 results["fuzzing_results"].extend(fuzz_results)
         
         logger.info("Completed full assessment")
-        return results 
+        return results
+
+# For backward compatibility
+IoTPTF = Aqua

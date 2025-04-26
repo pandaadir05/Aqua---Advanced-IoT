@@ -51,11 +51,11 @@ aqua assess 192.168.1.0/24 --output report.json
 ### Python API
 
 ```python
-from aqua.core import IoTPTF
+from aqua.core import Aqua  # Updated import to use Aqua instead of IoTPTF
 import asyncio
 
 async def run_assessment():
-    framework = IoTPTF()
+    framework = Aqua()  # Updated class name
     devices = await framework.discover_devices("192.168.1.0/24")
     print(f"Discovered {len(devices)} devices.")
     

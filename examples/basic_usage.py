@@ -1,9 +1,9 @@
 """
-Example script demonstrating basic usage of the IoT Penetration Testing Framework.
+Example script demonstrating basic usage of the Aqua IoT Security Analysis Framework.
 """
 
 import asyncio
-from iotptf import IoTPTF
+from aqua.core import Aqua  # Updated import
 from rich.console import Console
 
 console = Console()
@@ -11,7 +11,7 @@ console = Console()
 async def main():
     """Main function demonstrating framework usage."""
     # Initialize the framework
-    framework = IoTPTF()
+    framework = Aqua()  # Updated class name
     
     # Example network to scan
     network = "192.168.1.0/24"
@@ -54,4 +54,4 @@ async def main():
                     console.print(f"- {result['type']}: {result.get('error', 'Unknown error')}")
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
