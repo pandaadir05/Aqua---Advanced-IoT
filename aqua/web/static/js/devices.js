@@ -59,6 +59,108 @@ function loadDevices() {
 }
 
 /**
+ * Load demo device data
+ */
+function loadDemoDevices() {
+    const devices = [
+        {
+            id: "dev_1",
+            ip: "192.168.1.101",
+            hostname: "iot-camera-01",
+            mac: "AA:BB:CC:DD:EE:01",
+            device_type: "camera",
+            manufacturer: "SecurityCam",
+            model: "SC-2000",
+            firmware_version: "1.2.3",
+            is_online: true,
+            open_ports: [80, 443, 8080],
+            protocols: ["HTTP", "HTTPS", "RTSP"],
+            services: {"80": "HTTP", "443": "HTTPS", "8080": "HTTP-alt"},
+            vulnerabilities: [
+                {
+                    id: "vuln_1",
+                    name: "Default Credentials",
+                    description: "Device uses default login credentials",
+                    severity: "high"
+                }
+            ]
+        },
+        {
+            id: "dev_2",
+            ip: "192.168.1.102",
+            hostname: "smart-thermostat",
+            mac: "AA:BB:CC:DD:EE:02",
+            device_type: "thermostat",
+            manufacturer: "SmartHome",
+            model: "TH-2000",
+            firmware_version: "2.1.0",
+            is_online: true,
+            open_ports: [80, 1883],
+            protocols: ["HTTP", "MQTT"],
+            services: {"80": "HTTP", "1883": "MQTT"},
+            vulnerabilities: [
+                {
+                    id: "vuln_2",
+                    name: "Unencrypted MQTT",
+                    description: "Device uses unencrypted MQTT protocol",
+                    severity: "medium"
+                }
+            ]
+        },
+        {
+            id: "dev_3",
+            ip: "192.168.1.103",
+            hostname: "smart-lock",
+            mac: "AA:BB:CC:DD:EE:03",
+            device_type: "lock",
+            manufacturer: "SecureLock",
+            model: "SL-500",
+            firmware_version: "0.9.4",
+            is_online: true,
+            open_ports: [80, 443, 5683],
+            protocols: ["HTTP", "HTTPS", "CoAP"],
+            services: {"80": "HTTP", "443": "HTTPS", "5683": "CoAP"},
+            vulnerabilities: [
+                {
+                    id: "vuln_3",
+                    name: "Outdated Firmware",
+                    description: "Device is running outdated firmware with known vulnerabilities",
+                    severity: "high"
+                }
+            ]
+        },
+        {
+            id: "dev_4",
+            ip: "192.168.1.104",
+            hostname: "router",
+            mac: "AA:BB:CC:DD:EE:04",
+            device_type: "router",
+            manufacturer: "NetLink",
+            model: "NL-1200",
+            firmware_version: "3.4.2",
+            is_online: true,
+            open_ports: [80, 443, 22, 23],
+            protocols: ["HTTP", "HTTPS", "SSH", "Telnet"],
+            services: {"80": "HTTP", "443": "HTTPS", "22": "SSH", "23": "Telnet"},
+            vulnerabilities: [
+                {
+                    id: "vuln_5",
+                    name: "Open Telnet Port",
+                    description: "Device has open Telnet port which is insecure",
+                    severity: "critical"
+                }
+            ]
+        }
+    ];
+
+    // Process the demo data
+    updateDeviceStats(devices);
+    populateDeviceTable(devices);
+    updateDeviceDistributionChart(devices);
+    updateRiskDistributionChart(devices);
+}
+
+/**
  * Populate device inventory table
  */
 function populateDeviceTable(devices) {
@@ -88,11 +190,11 @@ function populateDeviceTable(devices) {
         
         // Determine icon based on device type
         let iconClass = 'bi-hdd';
-        if (device.type.toLowerCase().includes('camera')) iconClass = 'bi-camera-video';
-        if (device.type.toLowerCase().includes('router')) iconClass = 'bi-router';
-        if (device.type.toLowerCase().includes('speaker')) iconClass = 'bi-speaker';
-        if (device.type.toLowerCase().includes('lock')) iconClass = 'bi-lock';
-        if (device.type.toLowerCase().includes('thermostat')) iconClass = 'bi-thermometer';
+        if (device.device_type.toLowerCase().includes('camera')) iconClass = 'bi-camera-video';
+        if (device.device_type.toLowerCase().includes('router')) iconClass = 'bi-router';
+        if (device.device_type.toLowerCase().includes('speaker')) iconClass = 'bi-speaker';
+        if (device.device_type.toLowerCase().includes('lock')) iconClass = 'bi-lock';
+        if (device.device_type.toLowerCase().includes('thermostat')) iconClass = 'bi-thermometer';
         
         // Determine color based on risk score
         let colorClass = 'bg-green';
@@ -100,7 +202,7 @@ function populateDeviceTable(devices) {
         if (device.risk_score > 70) colorClass = 'bg-red';
         
         // Calculate online status
-        const isOnline = true; // placeholder: this would come from device data
+        const isOnline = device.is_online !== false;
         const statusBadge = isOnline ? 
             '<span class="badge bg-success">Online</span>' : 
             '<span class="badge bg-secondary">Offline</span>';
@@ -117,13 +219,13 @@ function populateDeviceTable(devices) {
                         <i class="bi ${iconClass}"></i>
                     </div>
                     <div>
-                        <div class="fw-medium">${device.type} - ${device.id}</div>
+                        <div class="fw-medium">${device.device_type} - ${device.id}</div>
                         <div class="small text-muted">${device.manufacturer}</div>
                     </div>
                 </div>
             </td>
             <td>${device.ip}</td>
-            <td>${device.type}</td>
+            <td>${device.device_type}</td>
             <td>${device.manufacturer}</td>
             <td>Just now</td>
             <td>
@@ -136,7 +238,7 @@ function populateDeviceTable(devices) {
             </td>
             <td>
                 ${statusBadge}
-                ${device.vulnerabilities > 0 ? `<span class="badge bg-danger ms-1">${device.vulnerabilities}</span>` : ''}
+                ${device.vulnerabilities.length > 0 ? `<span class="badge bg-danger ms-1">${device.vulnerabilities.length}</span>` : ''}
             </td>
             <td>
                 <div class="dropdown">
@@ -164,12 +266,12 @@ function populateDeviceTable(devices) {
 function updateDeviceStats(devices) {
     document.getElementById('totalDevicesCount').textContent = devices.length;
     
-    const vulnerableDevices = devices.filter(d => d.vulnerabilities > 0);
+    const vulnerableDevices = devices.filter(d => d.vulnerabilities.length > 0);
     document.getElementById('vulnerableDevicesCount').textContent = vulnerableDevices.length;
     
-    // For demo, we'll assume all are online
-    document.getElementById('onlineDevicesCount').textContent = devices.length;
-    document.getElementById('offlineDevicesCount').textContent = '0';
+    const onlineDevices = devices.filter(d => d.is_online !== false).length;
+    document.getElementById('onlineDevicesCount').textContent = onlineDevices;
+    document.getElementById('offlineDevicesCount').textContent = devices.length - onlineDevices;
 }
 
 /**
@@ -180,57 +282,72 @@ function initDeviceDistributionChart() {
     
     if (!chartElement) return;
     
-    fetch('/api/devices')
-        .then(response => response.json())
-        .then(devices => {
-            // Count devices by type
-            const deviceTypes = {};
-            devices.forEach(device => {
-                if (!deviceTypes[device.type]) {
-                    deviceTypes[device.type] = 0;
-                }
-                deviceTypes[device.type]++;
-            });
-            
-            // Prepare chart data
-            const labels = Object.keys(deviceTypes);
-            const data = Object.values(deviceTypes);
-            const colors = ['#2c7be5', '#e63757', '#00b274', '#f6c343', '#fd7e14', '#6b5eae', '#39afd1'];
-            
-            // Create chart
-            const options = {
-                series: data,
+    const options = {
+        series: [10, 8, 6, 5, 4, 5],
+        chart: {
+            type: 'pie',
+            height: 300,
+            toolbar: {
+                show: false
+            }
+        },
+        labels: ['Camera', 'Smart Speaker', 'Thermostat', 'Router', 'Lock', 'Other'],
+        colors: ['#2c7be5', '#6b5eae', '#00b274', '#f6c343', '#e63757', '#95aac9'],
+        legend: {
+            position: 'bottom'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
                 chart: {
-                    type: 'pie',
-                    height: 300,
-                    toolbar: {
-                        show: false
-                    }
+                    height: 200
                 },
-                labels: labels,
-                colors: colors,
                 legend: {
                     position: 'bottom'
-                },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                            height: 300
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }]
-            };
-            
-            const chart = new ApexCharts(chartElement, options);
-            chart.render();
-        })
-        .catch(error => {
-            console.error('Error loading device distribution data:', error);
-        });
+                }
+            }
+        }]
+    };
+    
+    window.deviceDistributionChart = new ApexCharts(chartElement, options);
+    window.deviceDistributionChart.render();
+}
+
+/**
+ * Update device distribution chart with real data
+ */
+function updateDeviceDistributionChart(devices) {
+    if (!window.deviceDistributionChart) return;
+    
+    // Count devices by type
+    const typeCounts = {};
+    
+    devices.forEach(device => {
+        const type = device.device_type || 'Unknown';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    // Get top 5 types + "Other"
+    const sortedTypes = Object.entries(typeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    const otherCount = devices.length - sortedTypes.reduce((sum, [_, count]) => sum + count, 0);
+    
+    // Prepare data for chart
+    const labels = sortedTypes.map(([type]) => type.charAt(0).toUpperCase() + type.slice(1));
+    const series = sortedTypes.map(([_, count]) => count);
+    
+    if (otherCount > 0) {
+        labels.push('Other');
+        series.push(otherCount);
+    }
+    
+    // Update chart
+    window.deviceDistributionChart.updateOptions({
+        labels: labels
+    });
+    window.deviceDistributionChart.updateSeries(series);
 }
 
 /**
@@ -241,82 +358,112 @@ function initRiskDistributionChart() {
     
     if (!chartElement) return;
     
-    fetch('/api/devices')
-        .then(response => response.json())
-        .then(devices => {
-            // Group by risk category
-            const riskCategories = {
-                'High Risk (70-100)': 0,
-                'Medium Risk (40-69)': 0,
-                'Low Risk (0-39)': 0
-            };
-            
-            devices.forEach(device => {
-                if (device.risk_score >= 70) {
-                    riskCategories['High Risk (70-100)']++;
-                } else if (device.risk_score >= 40) {
-                    riskCategories['Medium Risk (40-69)']++;
-                } else {
-                    riskCategories['Low Risk (0-39)']++;
-                }
-            });
-            
-            // Prepare chart data
-            const labels = Object.keys(riskCategories);
-            const data = Object.values(riskCategories);
-            const colors = ['#e63757', '#f6c343', '#00b274'];
-            
-            // Create chart
-            const options = {
-                series: data,
+    const options = {
+        series: [5, 8, 12, 15],
+        chart: {
+            type: 'donut',
+            height: 300,
+            toolbar: {
+                show: false
+            }
+        },
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        colors: ['#e63757', '#f6c343', '#00b274', '#2c7be5'],
+        legend: {
+            position: 'bottom'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
                 chart: {
-                    type: 'donut',
-                    height: 300,
-                    toolbar: {
-                        show: false
-                    }
-                },
-                labels: labels,
-                colors: colors,
-                dataLabels: {
-                    enabled: true
+                    height: 200
                 },
                 legend: {
                     position: 'bottom'
-                },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                            height: 300
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }]
-            };
-            
-            const chart = new ApexCharts(chartElement, options);
-            chart.render();
-        })
-        .catch(error => {
-            console.error('Error loading risk distribution data:', error);
-        });
+                }
+            }
+        }]
+    };
+    
+    window.riskDistributionChart = new ApexCharts(chartElement, options);
+    window.riskDistributionChart.render();
+}
+
+/**
+ * Update risk distribution chart with real data
+ */
+function updateRiskDistributionChart(devices) {
+    if (!window.riskDistributionChart) return;
+    
+    // Count devices by risk level
+    let criticalCount = 0;
+    let highCount = 0;
+    let mediumCount = 0;
+    let lowCount = 0;
+    
+    devices.forEach(device => {
+        const vulns = device.vulnerabilities || [];
+        if (vulns.some(v => v.severity === 'critical')) {
+            criticalCount++;
+        } else if (vulns.some(v => v.severity === 'high')) {
+            highCount++;
+        } else if (vulns.some(v => v.severity === 'medium')) {
+            mediumCount++;
+        } else if (vulns.some(v => v.severity === 'low')) {
+            lowCount++;
+        } else {
+            lowCount++;
+        }
+    });
+    
+    // Update chart
+    window.riskDistributionChart.updateSeries([criticalCount, highCount, mediumCount, lowCount]);
 }
 
 /**
  * Set up device filters
  */
 function setupDeviceFilters() {
-    // Add filter change handlers
-    const filters = document.querySelectorAll('#deviceTypeFilter, #manufacturerFilter, #riskFilter, #statusFilter');
-    filters.forEach(filter => {
-        filter.addEventListener('change', function() {
-            // This would filter the device table based on selected values
-            console.log('Filter applied:', this.id, this.value);
-            // In a real implementation, this would re-fetch or filter the device list
+    const filterButtons = document.querySelectorAll('.device-filter');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Apply filter
+            filterDevices(this.getAttribute('data-filter'));
         });
+    });
+}
+
+/**
+ * Filter device table
+ */
+function filterDevices(filter = 'all') {
+    const rows = document.querySelectorAll('#deviceInventoryTable tr');
+    
+    rows.forEach(row => {
+        const statusBadge = row.querySelector('.badge');
+        const riskBadge = row.querySelectorAll('.badge')[1];
+        
+        switch (filter) {
+            case 'online':
+                row.style.display = statusBadge?.textContent === 'Online' ? '' : 'none';
+                break;
+            case 'offline':
+                row.style.display = statusBadge?.textContent === 'Offline' ? '' : 'none';
+                break;
+            case 'vulnerable':
+                row.style.display = riskBadge?.textContent !== 'Low' ? '' : 'none';
+                break;
+            default:
+                row.style.display = '';
+                break;
+        }
     });
 }
 

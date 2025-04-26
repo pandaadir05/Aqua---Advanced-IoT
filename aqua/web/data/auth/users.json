@@ -1,0 +1,13 @@
+[
+  {
+    "id": "445ab59e-98dd-44b1-aab9-e1179498aa8a",
+    "username": "admin",
+    "email": "admin@example.com",
+    "full_name": "Admin User",
+    "password_hash": "2729ae26273cab11f454a696678194c4bfe1fb8d96a5f260326b42e572e15b32",
+    "salt": "b306d17310dbd3027fd9e8b94f75da31",
+    "role": "user",
+    "created_at": "2025-04-26T22:35:09.230126",
+    "last_login": null
+  }
+]

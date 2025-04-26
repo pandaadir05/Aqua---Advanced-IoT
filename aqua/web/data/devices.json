@@ -1,0 +1,92 @@
+[
+  {
+    "id": "cd37687e",
+    "ip": "192.168.1.101",
+    "hostname": "iot-camera-01",
+    "mac": null,
+    "device_type": "camera",
+    "manufacturer": "SecurityCam",
+    "model": "SC-2000",
+    "firmware_version": null,
+    "protocols": [
+      "HTTP",
+      "HTTPS",
+      "RTSP"
+    ],
+    "open_ports": [
+      80,
+      443,
+      8080
+    ],
+    "services": {
+      "80": "HTTP",
+      "443": "HTTPS",
+      "8080": "HTTP-alt"
+    },
+    "vulnerabilities": [],
+    "last_seen": "2025-04-26T22:17:15.895387",
+    "first_seen": "2025-04-26T22:17:15.895387",
+    "is_online": true,
+    "tags": [],
+    "notes": null
+  },
+  {
+    "id": "88bbe4e5",
+    "ip": "192.168.1.102",
+    "hostname": "smart-thermostat",
+    "mac": null,
+    "device_type": "thermostat",
+    "manufacturer": "SmartHome",
+    "model": "TH-2000",
+    "firmware_version": null,
+    "protocols": [
+      "HTTP",
+      "MQTT"
+    ],
+    "open_ports": [
+      80,
+      1883
+    ],
+    "services": {
+      "80": "HTTP",
+      "1883": "MQTT"
+    },
+    "vulnerabilities": [],
+    "last_seen": "2025-04-26T22:17:15.895387",
+    "first_seen": "2025-04-26T22:17:15.895387",
+    "is_online": true,
+    "tags": [],
+    "notes": null
+  },
+  {
+    "id": "afdf0882",
+    "ip": "192.168.1.103",
+    "hostname": "smart-lock",
+    "mac": null,
+    "device_type": "lock",
+    "manufacturer": "SecureLock",
+    "model": "SL-500",
+    "firmware_version": null,
+    "protocols": [
+      "HTTP",
+      "HTTPS",
+      "CoAP"
+    ],
+    "open_ports": [
+      80,
+      443,
+      5683
+    ],
+    "services": {
+      "80": "HTTP",
+      "443": "HTTPS",
+      "5683": "CoAP"
+    },
+    "vulnerabilities": [],
+    "last_seen": "2025-04-26T22:17:15.895387",
+    "first_seen": "2025-04-26T22:17:15.895387",
+    "is_online": true,
+    "tags": [],
+    "notes": null
+  }
+]

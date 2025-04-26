@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Aqua IoT Security Platform{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="dashboard-title">User Profile</h1>
+        <p class="text-muted">Manage your account settings and preferences</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body text-center py-5">
+                <div class="profile-image-container mb-4">
+                    <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200" alt="Profile" class="profile-image-lg">
+                    <button class="btn btn-sm btn-primary profile-image-edit" data-bs-toggle="modal" data-bs-target="#changeAvatarModal">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+                <h3 class="mb-1">{{ user.full_name }}</h3>
+                <p class="text-muted mb-3">{{ user.email }}</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ user.role|title }}</span>
+                        <span class="stat-label">Role</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">Active</span>
+                        <span class="stat-label">Status</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="bi bi-lock"></i> Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" value="{{ user.full_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ user.username }}" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" value="{{ user.email }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" value="{{ user.phone|default('') }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" rows="3">{{ user.bio|default('') }}</textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Preferences</h5>
+            </div>
+            <div class="card-body">
+                <form id="preferencesForm">
+                    <div class="mb-3">
+                        <label class="form-label">Theme</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="theme" id="lightTheme" value="light" checked>
+                                <label class="form-check-label" for="lightTheme">Light</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="theme" id="darkTheme" value="dark">
+                                <label class="form-check-label" for="darkTheme">Dark</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="theme" id="systemTheme" value="system">
+                                <label class="form-check-label" for="systemTheme">System Default</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notifications</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            <label class="form-check-label" for="emailNotifications">Email Notifications</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="securityAlerts" checked>
+                            <label class="form-check-label" for="securityAlerts">Security Alerts</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="productUpdates">
+                            <label class="form-check-label" for="productUpdates">Product Updates</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Preferences</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">Account Security</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">Two-Factor Authentication</h6>
+                            <p class="text-muted mb-0 small">Add an extra layer of security to your account</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">Active Sessions</h6>
+                            <p class="text-muted mb-0 small">Manage your active sessions across devices</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#activeSessionsModal">Manage</button>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0 text-danger">Delete Account</h6>
+                            <p class="text-muted mb-0 small">Permanently delete your account and all data</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Change Avatar Modal -->
+<div class="modal fade" id="changeAvatarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="avatarForm">
+                    <div class="mb-3">
+                        <label for="avatarFile" class="form-label">Upload Image</label>
+                        <input class="form-control" type="file" id="avatarFile" accept="image/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Sessions Modal -->
+<div class="modal fade" id="activeSessionsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Active Sessions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Location</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-laptop me-2"></i>
+                                        <span>Windows PC (Chrome)</span>
+                                    </div>
+                                </td>
+                                <td>New York, USA</td>
+                                <td>Current Session</td>
+                                <td>
+                                    <span class="badge bg-success">Current</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-phone me-2"></i>
+                                        <span>iPhone (Safari)</span>
+                                    </div>
+                                </td>
+                                <td>New York, USA</td>
+                                <td>2 hours ago</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger">Revoke</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger">Revoke All Other Sessions</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    This action cannot be undone. All your data will be permanently deleted.
+                </div>
+                <p>Please type <strong>DELETE</strong> to confirm:</p>
+                <input type="text" class="form-control" id="deleteConfirm">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>Delete My Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete account confirmation
+        const deleteConfirmField = document.getElementById('deleteConfirm');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        if (deleteConfirmField && confirmDeleteBtn) {
+            deleteConfirmField.addEventListener('input', function() {
+                confirmDeleteBtn.disabled = this.value.toUpperCase() !== 'DELETE';
+            });
+        }
+        
+        // Handle form submissions with toast notifications
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real app, send data to server
+                console.log('Form submitted:', this.id);
+                
+                // Show success notification
+                showToast('Changes saved successfully', 'success');
+            });
+        });
+        
+        // Initialize theme selection based on current theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.querySelector(`input[name="theme"][value="${currentTheme}"]`).checked = true;
+    });
+    
+    // Helper function to show toast notifications
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            container.id = 'toastContainer';
+            document.body.appendChild(container);
+        }
+        
+        document.getElementById('toastContainer').appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+</script>
+{% endblock %}

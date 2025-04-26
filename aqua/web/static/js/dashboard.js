@@ -1,731 +1,834 @@
+/**
+ * Aqua IoT Security Platform
+ * Dashboard Functionality
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Update stats
-    fetchStats();
+    // Initialize charts and statistics
+    initSecurityTrendsChart();
+    initDeviceSecurityChart();
+    initVulnerabilityPieChart();
     
-    // Set up scan form submission
+    // Load dashboard data
+    loadDashboardData();
+    
+    // Setup scan form handler
     setupScanForm();
     
-    // Refresh data every 30 seconds
-    setInterval(fetchStats, 30000);
+    // Setup WebSocket connection for real-time updates
+    startWebSocketConnection();
+    
+    // Set up refresh button
+    const refreshBtn = document.getElementById('refreshDashboardBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            loadDashboardData();
+        });
+    }
 });
 
-function fetchStats() {
-    fetch('/api/stats')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('total-scans').textContent = data.total_scans || 0;
-            document.getElementById('total-devices').textContent = data.total_devices || 0;
-            document.getElementById('total-vulnerabilities').textContent = data.total_vulnerabilities || 0;
-        })
-        .catch(error => console.error('Error fetching stats:', error));
+/**
+ * Load dashboard data
+ */
+function loadDashboardData() {
+    // Show loading spinner
+    document.querySelectorAll('.loading-spinner').forEach(spinner => {
+        spinner.style.display = 'block';
+    });
+    
+    // Make API calls to get data
+    Promise.all([
+        fetch('/api/devices').then(resp => resp.json()),
+        fetch('/api/vulnerabilities').then(resp => resp.json()),
+        fetch('/api/scans').then(resp => resp.json())
+    ])
+    .then(([devices, vulnerabilities, scans]) => {
+        updateStatistics(devices, vulnerabilities, scans);
+        updateDeviceSecurityChart(devices);
+        updateVulnerabilityPieChart(vulnerabilities);
+        loadCriticalVulnerabilities(vulnerabilities, devices);
+        loadRecentScans(scans);
+        
+        // Update network visualization if available
+        if (window.networkViz) {
+            window.networkViz.loadData(devices);
+        }
+        
+        // Hide loading spinners
+        document.querySelectorAll('.loading-spinner').forEach(spinner => {
+            spinner.style.display = 'none';
+        });
+    })
+    .catch(error => {
+        console.error('Error loading dashboard data:', error);
+        
+        // If API fails, load demo data
+        loadDemoDashboardData();
+        
+        // Hide loading spinners
+        document.querySelectorAll('.loading-spinner').forEach(spinner => {
+            spinner.style.display = 'none';
+        });
+    });
 }
 
-function setupScanForm() {
-    const form = document.getElementById('scan-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+/**
+ * Load demo dashboard data if API fails
+ */
+function loadDemoDashboardData() {
+    // Demo devices
+    const devices = [
+        { id: "dev_1", ip: "192.168.1.101", hostname: "iot-camera-01", device_type: "camera", manufacturer: "SecurityCam", is_online: true },
+        { id: "dev_2", ip: "192.168.1.102", hostname: "smart-thermostat", device_type: "thermostat", manufacturer: "SmartHome", is_online: true },
+        { id: "dev_3", ip: "192.168.1.103", hostname: "smart-lock", device_type: "lock", manufacturer: "SecureLock", is_online: true },
+        { id: "dev_4", ip: "192.168.1.104", hostname: "router", device_type: "router", manufacturer: "NetLink", is_online: true },
+        { id: "dev_5", ip: "192.168.1.105", hostname: "smart-tv", device_type: "tv", manufacturer: "SmartView", is_online: true }
+    ];
+    
+    // Demo vulnerabilities
+    const vulnerabilities = [
+        { id: "vuln_1", name: "Default Credentials", description: "Device uses default login credentials", severity: "high", device_id: "dev_1" },
+        { id: "vuln_2", name: "Unencrypted MQTT", description: "Device uses unencrypted MQTT protocol", severity: "medium", device_id: "dev_2" },
+        { id: "vuln_3", name: "Outdated Firmware", description: "Device is running outdated firmware", severity: "high", device_id: "dev_3" },
+        { id: "vuln_4", name: "Insecure Web Interface", description: "Device web interface has vulnerabilities", severity: "medium", device_id: "dev_1" },
+        { id: "vuln_5", name: "Open Telnet Port", description: "Device has open Telnet port", severity: "critical", device_id: "dev_4" }
+    ];
+    
+    // Demo scans
+    const scans = [
+        { id: "scan_1", name: "Weekly Security Scan", target: "192.168.1.0/24", status: "completed", started_at: "2023-10-15T10:00:00Z", completed_at: "2023-10-15T10:05:23Z" },
+        { id: "scan_2", name: "Quick Scan", target: "192.168.1.101", status: "completed", started_at: "2023-10-14T14:30:00Z", completed_at: "2023-10-14T14:31:15Z" },
+        { id: "scan_3", name: null, target: "192.168.1.0/24", status: "running", progress: 45, started_at: "2023-10-16T09:15:00Z" }
+    ];
+    
+    // Update UI with demo data
+    updateStatistics(devices, vulnerabilities, scans);
+    updateDeviceSecurityChart(devices);
+    updateVulnerabilityPieChart(vulnerabilities);
+    loadCriticalVulnerabilities(vulnerabilities, devices);
+    loadRecentScans(scans);
+}
+
+/**
+ * Update dashboard statistics
+ */
+function updateStatistics(devices, vulnerabilities, scans) {
+    // Update device count
+    const deviceCount = document.getElementById('deviceCount');
+    if (deviceCount) {
+        deviceCount.textContent = devices.length;
+    }
+    
+    // Update vulnerability count
+    const vulnCount = document.getElementById('vulnCount');
+    if (vulnCount) {
+        vulnCount.textContent = vulnerabilities.length;
+    }
+    
+    // Update critical vulnerability count
+    const criticalVulnCount = document.getElementById('criticalVulnCount');
+    if (criticalVulnCount) {
+        const critical = vulnerabilities.filter(v => v.severity === 'critical' || v.severity === 'high').length;
+        criticalVulnCount.textContent = critical;
+    }
+    
+    // Update scan count
+    const scanCount = document.getElementById('scanCount');
+    if (scanCount) {
+        const completedScans = scans.filter(s => s.status === 'completed').length;
+        scanCount.textContent = completedScans;
+    }
+}
+
+/**
+ * Initialize security trends chart
+ */
+function initSecurityTrendsChart() {
+    const chartElement = document.getElementById('securityTrendsChart');
+    
+    if (!chartElement) return;
+    
+    const options = {
+        series: [
+            {
+                name: 'Vulnerabilities',
+                type: 'column',
+                data: [14, 12, 19, 21, 17, 15, 18]
+            },
+            {
+                name: 'Threats Blocked',
+                type: 'line',
+                data: [34, 29, 51, 42, 33, 38, 45]
+            }
+        ],
+        chart: {
+            height: 350,
+            type: 'line',
+            toolbar: {
+                show: false
+            },
+            animations: {
+                enabled: true
+            },
+            fontFamily: 'Inter, sans-serif'
+        },
+        stroke: {
+            curve: 'smooth',
+            width: [0, 3]
+        },
+        colors: ['#e63757', '#2c7be5'],
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yaxis: [
+            {
+                title: {
+                    text: 'Vulnerabilities'
+                }
+            },
+            {
+                opposite: true,
+                title: {
+                    text: 'Threats Blocked'
+                }
+            }
+        ],
+        legend: {
+            position: 'top'
+        },
+        fill: {
+            opacity: [0.85, 1]
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+            theme: document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        }
+    };
+
+    const chart = new ApexCharts(chartElement, options);
+    chart.render();
+}
+
+/**
+ * Initialize device security chart
+ */
+function initDeviceSecurityChart() {
+    const chartElement = document.getElementById('deviceSecurityChart');
+    
+    if (!chartElement) return;
+    
+    const options = {
+        series: [60, 30, 10],
+        chart: {
+            type: 'donut',
+            height: 300,
+            toolbar: {
+                show: false
+            },
+            fontFamily: 'Inter, sans-serif'
+        },
+        labels: ['Secure', 'At Risk', 'Critical'],
+        colors: ['#00b274', '#f6c343', '#e63757'],
+        legend: {
+            position: 'bottom'
+        },
+        dataLabels: {
+            enabled: false
+        },
+        tooltip: {
+            enabled: true,
+            theme: document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    height: 250
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    window.deviceSecurityChart = new ApexCharts(chartElement, options);
+    window.deviceSecurityChart.render();
+}
+
+/**
+ * Update device security chart
+ */
+function updateDeviceSecurityChart(devices) {
+    if (!window.deviceSecurityChart || !devices.length) return;
+    
+    // Count devices by security status
+    const secure = devices.filter(d => !d.vulnerabilities || d.vulnerabilities.length === 0).length;
+    const atRisk = devices.filter(d => 
+        d.vulnerabilities && 
+        d.vulnerabilities.length > 0 && 
+        !d.vulnerabilities.some(v => v.severity === 'critical' || v.severity === 'high')
+    ).length;
+    const critical = devices.filter(d => 
+        d.vulnerabilities && 
+        d.vulnerabilities.some(v => v.severity === 'critical' || v.severity === 'high')
+    ).length;
+    
+    // Update chart
+    window.deviceSecurityChart.updateSeries([secure, atRisk, critical]);
+}
+
+/**
+ * Initialize vulnerability pie chart
+ */
+function initVulnerabilityPieChart() {
+    const chartElement = document.getElementById('vulnerabilityPieChart');
+    
+    if (!chartElement) return;
+    
+    const options = {
+        series: [40, 30, 20, 10],
+        chart: {
+            type: 'pie',
+            height: 300,
+            toolbar: {
+                show: false
+            },
+            fontFamily: 'Inter, sans-serif'
+        },
+        labels: ['High', 'Medium', 'Low', 'Info'],
+        colors: ['#e63757', '#f6c343', '#00b274', '#2c7be5'],
+        legend: {
+            position: 'bottom'
+        },
+        dataLabels: {
+            enabled: false
+        },
+        tooltip: {
+            enabled: true,
+            theme: document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    height: 250
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    window.vulnerabilityPieChart = new ApexCharts(chartElement, options);
+    window.vulnerabilityPieChart.render();
+}
+
+/**
+ * Update vulnerability distribution pie chart
+ */
+function updateVulnerabilityPieChart(vulnerabilities) {
+    if (!window.vulnerabilityPieChart || !vulnerabilities.length) return;
+    
+    // Count vulnerabilities by severity
+    const critical = vulnerabilities.filter(v => v.severity === 'critical').length;
+    const high = vulnerabilities.filter(v => v.severity === 'high').length;
+    const medium = vulnerabilities.filter(v => v.severity === 'medium').length;
+    const low = vulnerabilities.filter(v => v.severity === 'low').length;
+    const info = vulnerabilities.filter(v => v.severity === 'info').length;
+    
+    // Combine critical and high for simplicity
+    const highTotal = critical + high;
+    
+    // Update chart
+    window.vulnerabilityPieChart.updateSeries([highTotal, medium, low, info]);
+}
+
+/**
+ * Load critical vulnerabilities table
+ */
+function loadCriticalVulnerabilities(vulnerabilities, devices) {
+    const tableBody = document.getElementById('criticalVulnerabilitiesTable');
+    if (!tableBody) return;
+    
+    // Clear existing content
+    tableBody.innerHTML = '';
+    
+    // Sort and filter vulnerabilities
+    const criticalVulns = vulnerabilities
+        .filter(v => v.severity === 'critical' || v.severity === 'high')
+        .sort((a, b) => a.severity === 'critical' ? -1 : 1);
+    
+    // Take top 5
+    const topVulns = criticalVulns.slice(0, 5);
+    
+    if (topVulns.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No critical vulnerabilities found</td></tr>';
+        return;
+    }
+    
+    // Add vulnerabilities to table
+    topVulns.forEach(vuln => {
+        const device = devices.find(d => d.id === vuln.device_id) || { ip: 'Unknown', hostname: 'Unknown' };
+        
+        const row = document.createElement('tr');
+        
+        const severityClass = vuln.severity === 'critical' ? 'danger' : 'warning';
+        
+        row.innerHTML = `
+            <td>
+                <strong>${vuln.name}</strong><br>
+                <small class="text-muted">${device.hostname || device.ip}</small>
+            </td>
+            <td>${vuln.description}</td>
+            <td><span class="badge bg-${severityClass}">${vuln.severity}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary">View</button>
+                <button class="btn btn-sm btn-outline-success">Fix</button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+/**
+ * Load recent scans table
+ */
+function loadRecentScans(scans) {
+    const tableBody = document.getElementById('recentScansTable');
+    if (!tableBody) return;
+    
+    // Clear existing content
+    tableBody.innerHTML = '';
+    
+    // Sort scans by date (most recent first)
+    const sortedScans = [...scans].sort((a, b) => 
+        new Date(b.started_at) - new Date(a.started_at)
+    );
+    
+    // Take most recent 5
+    const recentScans = sortedScans.slice(0, 5);
+    
+    if (recentScans.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No recent scans found</td></tr>';
+        return;
+    }
+    
+    // Add scans to table
+    recentScans.forEach(scan => {
+        const row = document.createElement('tr');
+        
+        // Format the date/time
+        const startDate = new Date(scan.started_at);
+        const formattedDate = startDate.toLocaleString();
+        
+        // Determine status class
+        let statusClass = '';
+        switch(scan.status) {
+            case 'completed':
+                statusClass = 'success';
+                break;
+            case 'running':
+                statusClass = 'primary';
+                break;
+            case 'failed':
+                statusClass = 'danger';
+                break;
+            case 'stopped':
+                statusClass = 'warning';
+                break;
+            default:
+                statusClass = 'secondary';
+        }
+        
+        row.innerHTML = `
+            <td>${scan.name || `Scan of ${scan.target}`}</td>
+            <td>${scan.target}</td>
+            <td>${formattedDate}</td>
+            <td>
+                <span class="badge bg-${statusClass}">
+                    ${scan.status === 'running' ? `${scan.progress || 0}%` : scan.status}
+                </span>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+/**
+ * Update active step in the scan progress
+ * @param {number} step - The active step (1-based)
+ */
+function updateActiveStep(step) {
+    const scanSteps = document.querySelectorAll('.scan-step');
+    
+    scanSteps.forEach((stepEl, index) => {
+        if (index < step) {
+            stepEl.classList.add('active');
+        } else {
+            stepEl.classList.remove('active');
+        }
+    });
+}
+
+/**
+ * Update scan status in UI
+ */
+function updateScanStatus(scanId, status, progress) {
+    const scanProgressBar = document.getElementById('scanProgressBar');
+    const scanProgressText = document.getElementById('scanProgressText');
+    const scanProgressStatus = document.getElementById('scanProgressStatus');
+    const scanProgressCircle = document.querySelector('.progress-ring-circle');
+    const progressTextElement = document.querySelector('.scan-progress-circle .progress-text');
+    const scanLogContainer = document.getElementById('scanLogContainer');
+    
+    // Update progress bar if it exists
+    if (scanProgressBar) scanProgressBar.style.width = `${progress}%`;
+    
+    // Update status text if it exists
+    if (scanProgressStatus) scanProgressStatus.textContent = status;
+    
+    // Update progress circle animation if it exists
+    if (scanProgressCircle) {
+        const radius = scanProgressCircle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        scanProgressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        scanProgressCircle.style.strokeDashoffset = offset;
+        
+        // Update color based on progress
+        if (progress < 30) {
+            scanProgressCircle.style.stroke = '#2c7be5'; // Blue for early stages
+        } else if (progress < 60) {
+            scanProgressCircle.style.stroke = '#00b274'; // Green for mid stages
+        } else if (progress < 90) {
+            scanProgressCircle.style.stroke = '#f6c343'; // Yellow for later stages
+        } else {
+            scanProgressCircle.style.stroke = '#e63757'; // Red for final stages
+        }
+    }
+    
+    // Update progress text inside circle
+    if (progressTextElement) {
+        progressTextElement.textContent = `${progress}%`;
+        
+        // Add animation pulse effect on certain thresholds
+        if (progress % 25 === 0) {
+            progressTextElement.classList.add('pulse-animation');
+            setTimeout(() => {
+                progressTextElement.classList.remove('pulse-animation');
+            }, 1000);
+        }
+    }
+    
+    // Update log based on progress
+    if (scanLogContainer) {
+        // Add log entry based on progress
+        if (progress <= 10 && !scanLogContainer.querySelector('.log-entry[data-phase="init"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Initializing scan...', 'init');
+        } else if (progress > 10 && progress <= 30 && !scanLogContainer.querySelector('.log-entry[data-phase="discovery"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Performing host discovery...', 'discovery');
+        } else if (progress > 30 && progress <= 60 && !scanLogContainer.querySelector('.log-entry[data-phase="ports"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Scanning ports and services...', 'ports');
+        } else if (progress > 60 && progress <= 80 && !scanLogContainer.querySelector('.log-entry[data-phase="vulns"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Analyzing vulnerabilities...', 'vulns');
+        } else if (progress > 80 && progress < 100 && !scanLogContainer.querySelector('.log-entry[data-phase="results"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Processing results...', 'results');
+        } else if (progress >= 100 && status === 'completed' && !scanLogContainer.querySelector('.log-entry[data-phase="complete"]')) {
+            addLogEntry(scanLogContainer, '[INFO] Scan completed successfully', 'complete');
             
-            const formData = new FormData(form);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
+            // Close the modal after a delay
+            setTimeout(() => {
+                const progressModal = bootstrap.Modal.getInstance(document.getElementById('scanProgressModal'));
+                if (progressModal) progressModal.hide();
+                
+                // Refresh dashboard data
+                loadDashboardData();
+            }, 2000);
+        }
+    }
+    
+    // Update the scan steps based on progress
+    if (progress <= 20) {
+        updateActiveStep(1);
+    } else if (progress <= 40) {
+        updateActiveStep(2);
+    } else if (progress <= 60) {
+        updateActiveStep(3); 
+    } else if (progress <= 80) {
+        updateActiveStep(4);
+    } else if (progress >= 100) {
+        updateActiveStep(5);
+    }
+    
+    if (scanProgressText) {
+        if (progress <= 25) {
+            scanProgressText.innerHTML = `<span class="badge bg-info me-2">Discovery</span> <span class="text-muted">${progress}% complete</span>`;
+        } else if (progress <= 50) {
+            scanProgressText.innerHTML = `<span class="badge bg-primary me-2">Ports</span> <span class="text-muted">${progress}% complete</span>`;
+        } else if (progress <= 75) {
+            scanProgressText.innerHTML = `<span class="badge bg-warning me-2">Vulnerabilities</span> <span class="text-muted">${progress}% complete</span>`;
+        } else {
+            scanProgressText.innerHTML = `<span class="badge bg-danger me-2">Analysis</span> <span class="text-muted">${progress}% complete</span>`;
+        }
+        
+        if (progress >= 100) {
+            scanProgressText.innerHTML = '<span class="badge bg-success me-2">Completed</span> <span class="text-success">100% complete</span>';
+        } else if (status === 'failed') {
+            scanProgressText.innerHTML = '<span class="badge bg-danger me-2">Failed</span> Scan failed!';
+        } else if (status === 'stopped') {
+            scanProgressText.innerHTML = '<span class="badge bg-warning me-2">Stopped</span> Scan stopped.';
+        }
+    }
+}
+
+/**
+ * Add a log entry to the scan log
+ */
+function addLogEntry(container, message, phase) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.setAttribute('data-phase', phase);
+    entry.textContent = message;
+    
+    // Add timestamp
+    const timestamp = new Date().toLocaleTimeString();
+    entry.textContent = `[${timestamp}] ${message}`;
+    
+    container.appendChild(entry);
+    
+    // Auto-scroll to bottom
+    container.scrollTop = container.scrollHeight;
+    
+    // Add subtle animation
+    entry.style.opacity = '0';
+    entry.style.transform = 'translateX(-10px)';
+    setTimeout(() => {
+        entry.style.opacity = '1';
+        entry.style.transform = 'translateX(0)';
+    }, 10);
+}
+
+/**
+ * Setup cancel scan button
+ */
+function setupCancelScanButton() {
+    const cancelScanBtn = document.getElementById('cancelScanBtn');
+    if (!cancelScanBtn) return;
+    
+    cancelScanBtn.addEventListener('click', function() {
+        const scanId = this.getAttribute('data-scan-id');
+        if (!scanId) {
+            console.error('No scan ID found for cancellation');
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Cancelling...';
+        
+        // Send cancel request to API
+        fetch(`/api/scans/${scanId}/stop`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Scan cancelled:', result);
+            const scanProgressText = document.getElementById('scanProgressText');
+            if (scanProgressText) {
+                scanProgressText.innerHTML = '<span class="badge bg-warning me-2">Cancelled</span> Scan cancelled by user';
             }
             
-            fetch('/api/scan', {
+            const scanLogContainer = document.getElementById('scanLogContainer');
+            if (scanLogContainer) {
+                addLogEntry(scanLogContainer, '[WARNING] Scan cancelled by user', 'cancelled');
+            }
+            
+            // Close modal after a short delay
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('scanProgressModal'));
+                if (modal) modal.hide();
+            }, 2000);
+        })
+        .catch(error => {
+            console.error('Error cancelling scan:', error);
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-stop-fill me-1"></i>Cancel Scan';
+        });
+    });
+}
+
+/**
+ * Set up scan form
+ */
+function setupScanForm() {
+    const startScanBtn = document.getElementById('startScanBtn');
+    
+    if (startScanBtn) {
+        startScanBtn.addEventListener('click', function() {
+            // Get form data
+            const scanTarget = document.getElementById('scanTarget').value;
+            const scanName = document.getElementById('scanName').value;
+            const scanType = document.getElementById('scanType').value;
+            
+            if (!scanTarget) {
+                alert('Please enter a target IP or network range');
+                return;
+            }
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newScanModal'));
+            modal.hide();
+            
+            // Show progress modal
+            const progressModal = new bootstrap.Modal(document.getElementById('scanProgressModal'));
+            progressModal.show();
+            
+            // Reset progress bar
+            const scanProgressBar = document.getElementById('scanProgressBar');
+            const scanProgressText = document.getElementById('scanProgressText');
+            const scanProgressTarget = document.getElementById('scanProgressTarget');
+            const scanProgressType = document.getElementById('scanProgressType');
+            const scanLogContainer = document.getElementById('scanLogContainer');
+            
+            if (scanProgressBar) scanProgressBar.style.width = '0%';
+            if (scanProgressText) scanProgressText.textContent = 'Starting scan...';
+            if (scanProgressTarget) scanProgressTarget.textContent = scanTarget;
+            if (scanProgressType) scanProgressType.textContent = scanType;
+            if (scanLogContainer) scanLogContainer.innerHTML = '<div class="log-entry">[INFO] Initializing scan...</div>';
+            
+            // Set current time
+            const scanProgressTime = document.getElementById('scanProgressTime');
+            if (scanProgressTime) {
+                scanProgressTime.textContent = new Date().toLocaleString();
+            }
+            
+            // Create scan data
+            const data = {
+                target: scanTarget,
+                scan_type: scanType
+            };
+            
+            if (scanName) {
+                data.name = scanName;
+            }
+            
+            console.log('Starting scan with data:', data);
+            
+            // Start the scan via API
+            fetch('/api/scans', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(result => {
-                // Close the modal
-                const scanModal = bootstrap.Modal.getInstance(document.getElementById('newScanModal'));
-                scanModal.hide();
-                
-                // Show progress modal
-                document.getElementById('scanProgressTarget').textContent = data.target;
-                document.getElementById('scanProgressType').textContent = data.scan_type;
-                const progressModal = new bootstrap.Modal(document.getElementById('scanProgressModal'));
-                progressModal.show();
-                
-                // Start tracking scan progress
-                trackScanProgress(result.scan_id);
-                
-                // Add entry to recent scans table
-                addRecentScan({
-                    id: result.scan_id,
-                    name: data.name || `Scan of ${data.target}`,
-                    target: data.target,
-                    status: 'running',
-                    progress: 0
-                });
+                console.log('Scan started:', result);
+                if (result.scan_id) {
+                    // Store scan ID for cancellation
+                    const cancelScanBtn = document.getElementById('cancelScanBtn');
+                    if (cancelScanBtn) {
+                        cancelScanBtn.setAttribute('data-scan-id', result.scan_id);
+                    }
+                    
+                    // Add a log entry
+                    if (scanLogContainer) {
+                        addLogEntry(scanLogContainer, `[INFO] Scan started with ID: ${result.scan_id}`, 'start');
+                    }
+                    
+                    // The progress will be updated via WebSocket
+                    trackScanProgress(result.scan_id);
+                } else {
+                    throw new Error('No scan ID returned');
+                }
             })
             .catch(error => {
                 console.error('Error starting scan:', error);
-                alert('Error starting scan. Please try again.');
+                
+                // Show error in log
+                if (scanLogContainer) {
+                    addLogEntry(scanLogContainer, `[ERROR] Failed to start scan: ${error.message}`, 'error');
+                }
+                
+                // Update progress text with error
+                if (scanProgressText) {
+                    scanProgressText.textContent = 'Scan failed to start';
+                }
+                
+                // Don't close the modal, let the user see the error
+                // Instead, add a close button
+                const footerDiv = document.createElement('div');
+                footerDiv.className = 'text-center mt-3';
+                footerDiv.innerHTML = `
+                    <button type="button" class="btn btn-secondary" onclick="bootstrap.Modal.getInstance(document.getElementById('scanProgressModal')).hide()">
+                        Close
+                    </button>
+                `;
+                
+                if (scanLogContainer) {
+                    scanLogContainer.appendChild(footerDiv);
+                }
             });
         });
     }
+    
+    // Setup cancel button
+    setupCancelScanButton();
 }
 
 /**
  * Track scan progress and update UI
  */
 function trackScanProgress(scanId) {
-    const progressCircle = document.querySelector('.progress-ring-circle');
-    const progressText = document.querySelector('.progress-text');
-    const logContainer = document.getElementById('scanLogContainer');
+    console.log('Tracking scan progress for ID:', scanId);
+    // This function will be called after a scan is started
+    // The progress updates will come from WebSocket
     
-    // Calculate circumference
-    const radius = parseFloat(progressCircle.getAttribute('r'));
-    const circumference = 2 * Math.PI * radius;
-    progressCircle.style.strokeDasharray = circumference;
-    
-    function updateProgress(progress) {
-        const offset = circumference - (progress / 100) * circumference;
-        progressCircle.style.strokeDashoffset = offset;
-        progressText.textContent = `${progress}%`;
-        
-        // Add log entry
-        const logEntry = document.createElement('div');
-        logEntry.classList.add('log-entry');
-        logEntry.textContent = `[INFO] Scanning progress: ${progress}%`;
-        logContainer.appendChild(logEntry);
-        logContainer.scrollTop = logContainer.scrollHeight;
-    }
-    
-    // Initial check
-    checkScanStatus();
-    
-    // Set up interval to check status
-    const statusInterval = setInterval(checkScanStatus, 2000);
-    
-    function checkScanStatus() {
-        fetch(`/api/scan/${scanId}`)
-            .then(response => response.json())
-            .then(data => {
-                updateProgress(data.progress);
+    // Poll for scan status in case WebSocket fails
+    const statusInterval = setInterval(() => {
+        console.log('Polling scan status for ID:', scanId);
+        fetch(`/api/scans/${scanId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(scan => {
+                console.log('Scan status received:', scan);
+                updateScanStatus(scanId, scan.status, scan.progress);
                 
-                // Update status
-                document.getElementById('scanProgressStatus').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                
-                // If scan is complete or failed, clear interval
-                if (data.status === 'completed' || data.status === 'failed') {
+                if (scan.status !== 'running') {
                     clearInterval(statusInterval);
                     
-                    // Add completion log
-                    const logEntry = document.createElement('div');
-                    logEntry.classList.add('log-entry');
-                    logEntry.textContent = `[INFO] Scan ${data.status}`;
-                    logContainer.appendChild(logEntry);
-                    
-                    // Update recent scans table
-                    updateScanStatus(scanId, data.status, data.progress);
-                    
-                    // Refresh dashboard data
-                    loadDashboardData();
+                    // If scan completed, refresh dashboard data
+                    if (scan.status === 'completed') {
+                        loadDashboardData();
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error checking scan status:', error);
                 clearInterval(statusInterval);
             });
-    }
-}
-
-/**
- * Add scan to recent scans table
- */
-function addRecentScan(scan) {
-    const recentScansTable = document.getElementById('recentScansTable');
-    
-    if (recentScansTable) {
-        const row = document.createElement('tr');
-        row.setAttribute('data-scan-id', scan.id);
-        
-        row.innerHTML = `
-            <td>${scan.name || 'Unnamed scan'}</td>
-            <td>${scan.target}</td>
-            <td>
-                <span class="status-${scan.status}">${scan.status.charAt(0).toUpperCase() + scan.status.slice(1)}</span>
-            </td>
-            <td>
-                <div class="progress" style="height: 5px;">
-                    <div class="progress-bar" role="progressbar" style="width: ${scan.progress}%" aria-valuenow="${scan.progress}" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <small class="progress-text">${scan.progress}%</small>
-            </td>
-        `;
-        
-        // Insert at the beginning
-        if (recentScansTable.querySelector('tbody tr')) {
-            recentScansTable.querySelector('tbody').insertBefore(row, recentScansTable.querySelector('tbody tr'));
-        } else {
-            recentScansTable.querySelector('tbody').appendChild(row);
-        }
-    }
-}
-
-/**
- * Update scan status in the recent scans table
- */
-function updateScanStatus(scanId, status, progress) {
-    const recentScansTable = document.getElementById('recentScansTable');
-    
-    if (recentScansTable) {
-        const row = recentScansTable.querySelector(`tr[data-scan-id="${scanId}"]`);
-        
-        if (row) {
-            const statusCell = row.querySelector('td:nth-child(3)');
-            const progressCell = row.querySelector('td:nth-child(4)');
-            
-            statusCell.innerHTML = `<span class="status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
-            progressCell.querySelector('.progress-bar').style.width = `${progress}%`;
-            progressCell.querySelector('.progress-text').textContent = `${progress}%`;
-        }
-    }
-}
-
-/**
- * Load dashboard data and update UI
- */
-function loadDashboardData() {
-    fetch('/api/stats')
-        .then(response => response.json())
-        .then(data => {
-            updateStatCards(data);
-            updateRiskGauge(data.risk_score);
-            updateRiskFactors(data.risk_factors);
-            updateTrendsChart(data.trends);
-            updateVulnerabilityPieChart(data.vulnerability_severity);
-            loadDevicesTable();
-            loadVulnerabilitiesTable();
-            loadScansTable();
-        })
-        .catch(error => {
-            console.error('Error loading dashboard data:', error);
-        });
-}
-
-/**
- * Update stat cards with latest numbers
- */
-function updateStatCards(data) {
-    document.getElementById('deviceCount').textContent = data.total_devices;
-    document.getElementById('vulnCount').textContent = data.total_vulnerabilities;
-    document.getElementById('riskScore').textContent = data.risk_score;
-    document.getElementById('scanCount').textContent = data.completed_scans;
-}
-
-/**
- * Update risk gauge chart
- */
-function updateRiskGauge(score) {
-    const gaugeElement = document.getElementById('riskGaugeChart');
-    
-    if (!gaugeElement) return;
-    
-    // Clear previous chart if it exists
-    gaugeElement.innerHTML = '';
-    
-    const options = {
-        series: [score],
-        chart: {
-            type: 'radialBar',
-            height: 250,
-            toolbar: {
-                show: false
-            }
-        },
-        plotOptions: {
-            radialBar: {
-                startAngle: -135,
-                endAngle: 135,
-                hollow: {
-                    margin: 0,
-                    size: '70%'
-                },
-                track: {
-                    background: '#e7e7e7',
-                    strokeWidth: '97%',
-                    margin: 5,
-                    dropShadow: {
-                        enabled: false,
-                    }
-                },
-                dataLabels: {
-                    name: {
-                        show: true,
-                        fontSize: '16px',
-                        fontFamily: 'Segoe UI, sans-serif',
-                        fontWeight: 600,
-                        color: undefined,
-                        offsetY: -10
-                    },
-                    value: {
-                        offsetY: 0,
-                        fontSize: '22px',
-                        fontFamily: 'Segoe UI, sans-serif',
-                        fontWeight: 700,
-                        color: undefined,
-                        formatter: function (val) {
-                            return val;
-                        }
-                    }
-                }
-            }
-        },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shade: 'dark',
-                shadeIntensity: 0.15,
-                inverseColors: false,
-                opacityFrom: 1,
-                opacityTo: 1,
-                stops: [0, 50, 100],
-                colorStops: [
-                    {
-                        offset: 0,
-                        color: '#00b274',
-                        opacity: 1
-                    },
-                    {
-                        offset: 50,
-                        color: '#f6c343',
-                        opacity: 1
-                    },
-                    {
-                        offset: 100,
-                        color: '#e63757',
-                        opacity: 1
-                    }
-                ]
-            }
-        },
-        stroke: {
-            dashArray: 4
-        },
-        labels: ['Risk Score'],
-    };
-
-    const chart = new ApexCharts(gaugeElement, options);
-    chart.render();
-}
-
-/**
- * Update risk factors list
- */
-function updateRiskFactors(factors) {
-    const container = document.getElementById('riskFactorsList');
-    
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    factors.forEach(factor => {
-        const item = document.createElement('div');
-        item.classList.add('risk-factor-item');
-        
-        let colorClass = 'bg-green';
-        if (factor.impact > 20) colorClass = 'bg-yellow';
-        if (factor.impact > 25) colorClass = 'bg-red';
-        
-        item.innerHTML = `
-            <div class="w-100">
-                <div class="d-flex justify-content-between">
-                    <span class="risk-factor-name">${factor.factor}</span>
-                    <span class="risk-factor-value">${factor.impact}%</span>
-                </div>
-                <div class="risk-factor-bar">
-                    <div class="risk-factor-progress ${colorClass}" style="width: ${factor.impact}%"></div>
-                </div>
-            </div>
-        `;
-        
-        container.appendChild(item);
-    });
-}
-
-/**
- * Update trends chart
- */
-function updateTrendsChart(trendsData) {
-    const chartElement = document.getElementById('trendsChart');
-    
-    if (!chartElement) return;
-    
-    // Clear previous chart if it exists
-    chartElement.innerHTML = '';
-    
-    const options = {
-        series: [
-            {
-                name: 'Vulnerabilities',
-                data: trendsData.vulnerabilities
-            },
-            {
-                name: 'Devices',
-                data: trendsData.devices
-            }
-        ],
-        chart: {
-            type: 'line',
-            height: 300,
-            toolbar: {
-                show: false
-            },
-            zoom: {
-                enabled: false
-            }
-        },
-        colors: ['#e63757', '#2c7be5'],
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 3
-        },
-        grid: {
-            borderColor: '#e0e0e0',
-            strokeDashArray: 4,
-            xaxis: {
-                lines: {
-                    show: true
-                }
-            }
-        },
-        markers: {
-            size: 4,
-            colors: ['#e63757', '#2c7be5'],
-            strokeColors: '#fff',
-            strokeWidth: 2
-        },
-        xaxis: {
-            categories: trendsData.dates,
-            labels: {
-                style: {
-                    colors: '#95aac9',
-                    fontSize: '12px',
-                    fontFamily: 'Segoe UI, sans-serif',
-                }
-            }
-        },
-        yaxis: {
-            labels: {
-                style: {
-                    colors: '#95aac9',
-                    fontSize: '12px',
-                    fontFamily: 'Segoe UI, sans-serif',
-                }
-            }
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            offsetY: -15,
-            fontFamily: 'Segoe UI, sans-serif',
-            fontSize: '13px',
-        },
-        tooltip: {
-            theme: 'light',
-            y: {
-                formatter: function(value) {
-                    return value;
-                }
-            }
-        }
-    };
-
-    const chart = new ApexCharts(chartElement, options);
-    chart.render();
-    
-    // Add event listeners for chart filters
-    const filters = document.querySelectorAll('[data-chart-filter]');
-    filters.forEach(filter => {
-        filter.addEventListener('click', function() {
-            const filterType = this.getAttribute('data-chart-filter');
-            
-            // Update active class
-            filters.forEach(f => f.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Update chart based on filter
-            if (filterType === 'vulnerabilities') {
-                chart.updateSeries([
-                    {
-                        name: 'Vulnerabilities',
-                        data: trendsData.vulnerabilities
-                    }
-                ]);
-            } else if (filterType === 'devices') {
-                chart.updateSeries([
-                    {
-                        name: 'Devices',
-                        data: trendsData.devices
-                    }
-                ]);
-            }
-        });
-    });
-}
-
-/**
- * Update vulnerability distribution pie chart
- */
-function updateVulnerabilityPieChart(severityData) {
-    const chartElement = document.getElementById('vulnerabilityPieChart');
-    const legendElement = document.getElementById('vulnPieLegend');
-    
-    if (!chartElement) return;
-    
-    // Clear previous chart if it exists
-    chartElement.innerHTML = '';
-    
-    const severities = Object.keys(severityData);
-    const counts = Object.values(severityData);
-    
-    const options = {
-        series: counts,
-        chart: {
-            type: 'donut',
-            height: 240
-        },
-        labels: severities,
-        colors: ['#e63757', '#fd7e14', '#f6c343', '#39afd1'],
-        plotOptions: {
-            pie: {
-                donut: {
-                    size: '65%'
-                }
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        legend: {
-            show: false
-        },
-        tooltip: {
-            y: {
-                formatter: function(value) {
-                    return value + ' vulnerabilities';
-                }
-            }
-        }
-    };
-
-    const chart = new ApexCharts(chartElement, options);
-    chart.render();
-    
-    // Create custom legend
-    if (legendElement) {
-        legendElement.innerHTML = '';
-        
-        const colors = ['#e63757', '#fd7e14', '#f6c343', '#39afd1'];
-        
-        severities.forEach((severity, index) => {
-            const legendItem = document.createElement('div');
-            legendItem.classList.add('d-flex', 'align-items-center', 'mb-2');
-            
-            legendItem.innerHTML = `
-                <div style="width: 12px; height: 12px; background-color: ${colors[index]}; margin-right: 8px; border-radius: 2px;"></div>
-                <div class="me-auto">${severity}</div>
-                <div class="fw-bold">${counts[index]}</div>
-            `;
-            
-            legendElement.appendChild(legendItem);
-        });
-    }
-}
-
-/**
- * Load and populate devices table
- */
-function loadDevicesTable() {
-    const tableElement = document.getElementById('vulnerableDevicesTable');
-    
-    if (!tableElement) return;
-    
-    fetch('/api/devices')
-        .then(response => response.json())
-        .then(devices => {
-            // Sort devices by risk score descending
-            devices.sort((a, b) => b.risk_score - a.risk_score);
-            
-            // Take top 5
-            const topDevices = devices.slice(0, 5);
-            
-            // Clear and populate table
-            tableElement.innerHTML = '';
-            
-            topDevices.forEach(device => {
-                const row = document.createElement('tr');
-                
-                // Determine icon based on device type
-                let iconClass = 'bi-hdd';
-                if (device.type.toLowerCase().includes('camera')) iconClass = 'bi-camera-video';
-                if (device.type.toLowerCase().includes('router')) iconClass = 'bi-router';
-                if (device.type.toLowerCase().includes('speaker')) iconClass = 'bi-speaker';
-                if (device.type.toLowerCase().includes('lock')) iconClass = 'bi-lock';
-                if (device.type.toLowerCase().includes('thermostat')) iconClass = 'bi-thermometer';
-                
-                // Determine color based on risk score
-                let colorClass = 'bg-green';
-                if (device.risk_score > 40) colorClass = 'bg-yellow';
-                if (device.risk_score > 70) colorClass = 'bg-red';
-                
-                row.innerHTML = `
-                    <td>
-                        <div class="device-name">
-                            <div class="device-icon ${colorClass}">
-                                <i class="bi ${iconClass}"></i>
-                            </div>
-                            <div>
-                                <div class="fw-medium">${device.ip}</div>
-                                <div class="small text-muted">${device.manufacturer}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>${device.type}</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <span class="fw-medium me-2">${device.risk_score}</span>
-                            <div class="progress flex-grow-1" style="height: 5px;">
-                                <div class="progress-bar ${colorClass}" role="progressbar" style="width: ${device.risk_score}%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge bg-danger">${device.vulnerabilities}</span>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Actions
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/devices?id=${device.id}">View Details</a></li>
-                                <li><a class="dropdown-item" href="#">Run Scan</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#">Block Device</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                `;
-                
-                tableElement.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading devices:', error);
-        });
-}
-
-/**
- * Load and populate vulnerabilities table
- */
-function loadVulnerabilitiesTable() {
-    const tableElement = document.getElementById('criticalVulnerabilitiesTable');
-    
-    if (!tableElement) return;
-    
-    fetch('/api/vulnerabilities')
-        .then(response => response.json())
-        .then(vulnerabilities => {
-            // Filter for critical vulnerabilities
-            const criticalVulnerabilities = vulnerabilities.filter(v => 
-                v.severity === 'Critical' || v.severity === 'High'
-            ).slice(0, 5);
-            
-            // Clear and populate table
-            tableElement.innerHTML = '';
-            
-            criticalVulnerabilities.forEach(vuln => {
-                const row = document.createElement('tr');
-                
-                // Get device info
-                fetch(`/api/devices/${vuln.device_id}`)
-                    .then(response => response.json())
-                    .then(device => {
-                        const severityClass = vuln.severity === 'Critical' ? 'badge-critical' : 'badge-high';
-                        
-                        row.innerHTML = `
-                            <td>
-                                <div class="fw-medium">${vuln.name}</div>
-                                <div class="small text-muted">${vuln.details}</div>
-                            </td>
-                            <td>
-                                <div class="fw-medium">${device.ip}</div>
-                                <div class="small text-muted">${device.type}</div>
-                            </td>
-                            <td>
-                                <span class="badge ${severityClass}">${vuln.severity}</span>
-                            </td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        Actions
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="/vulnerabilities?id=${vuln.id}">View Details</a></li>
-                                        <li><a class="dropdown-item" href="#">Remediation Guide</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="#">Mark as Fixed</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        `;
-                        
-                        tableElement.appendChild(row);
-                    })
-                    .catch(error => {
-                        console.error('Error loading device info:', error);
-                    });
-            });
-        })
-        .catch(error => {
-            console.error('Error loading vulnerabilities:', error);
-        });
-}
-
-/**
- * Load and populate recent scans table
- */
-function loadScansTable() {
-    const tableElement = document.getElementById('recentScansTable');
-    
-    if (!tableElement) return;
-    
-    fetch('/api/scans')
-        .then(response => response.json())
-        .then(scans => {
-            // Take most recent 5 scans
-            const recentScans = scans.slice(0, 5);
-            
-            // Clear table if this is a full refresh
-            if (recentScans.length > 0) {
-                tableElement.innerHTML = '';
-            }
-            
-            // Populate table
-            recentScans.forEach(scan => {
-                addRecentScan({
-                    id: scan.id,
-                    name: scan.name,
-                    target: scan.target,
-                    status: scan.status,
-                    progress: scan.progress
-                });
-            });
-        })
-        .catch(error => {
-            console.error('Error loading scans:', error);
-        });
+    }, 3000);
 }
 
 /**
@@ -735,94 +838,71 @@ function startWebSocketConnection() {
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
     
-    const socket = new WebSocket(wsUrl);
-    
-    socket.onopen = function(e) {
-        console.log('WebSocket connection established');
-    };
-    
-    socket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
+    try {
+        const socket = new WebSocket(wsUrl);
         
-        // Handle different message types
-        switch(data.type) {
-            case 'scan_progress':
-                updateScanStatus(data.scan_id, 'running', data.progress);
-                break;
+        socket.onopen = function(e) {
+            console.log('WebSocket connection established');
+        };
+        
+        socket.onmessage = function(event) {
+            console.log('WebSocket message received:', event.data);
+            try {
+                const data = JSON.parse(event.data);
                 
-            case 'scan_completed':
-                // Refresh data when scan completes
-                loadDashboardData();
-                break;
-                
-            case 'scan_error':
-                console.error('Scan error:', data.error);
-                updateScanStatus(data.scan_id, 'failed', 100);
-                break;
-                
-            case 'new_alert':
-                addNotification(data.alert);
-                break;
-        }
-    };
-    
-    socket.onclose = function(event) {
-        if (!event.wasClean) {
-            console.log('WebSocket connection closed unexpectedly. Reconnecting...');
-            // Try to reconnect after a delay
-            setTimeout(startWebSocketConnection, 3000);
-        }
-    };
-    
-    socket.onerror = function(error) {
-        console.error('WebSocket error:', error);
-    };
-    
-    // Keep connection alive
-    setInterval(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({type: 'ping'}));
-        }
-    }, 30000);
-}
-
-/**
- * Add a new notification to the dropdown
- */
-function addNotification(notification) {
-    const container = document.getElementById('notificationsContainer');
-    
-    if (!container) return;
-    
-    const notificationItem = document.createElement('li');
-    notificationItem.classList.add('notification-item', 'unread');
-    
-    if (notification.severity === 'critical') {
-        notificationItem.classList.add('critical');
-    }
-    
-    // Determine icon class based on notification type
-    let iconClass = 'bi-info-circle-fill';
-    if (notification.type === 'alert') iconClass = 'bi-exclamation-triangle-fill';
-    if (notification.type === 'warning') iconClass = 'bi-exclamation-circle-fill';
-    
-    notificationItem.innerHTML = `
-        <div class="notification-icon">
-            <i class="${iconClass}"></i>
-        </div>
-        <div class="notification-content">
-            <div class="notification-message">${notification.message}</div>
-            <div class="notification-time">Just now</div>
-        </div>
-    `;
-    
-    // Add to the beginning
-    container.insertBefore(notificationItem, container.firstChild);
-    
-    // Update badge count
-    const badge = document.querySelector('.notification-badge');
-    if (badge) {
-        const currentCount = parseInt(badge.textContent);
-        badge.textContent = currentCount + 1;
+                // Handle different message types
+                switch(data.type) {
+                    case 'scan_progress':
+                        updateScanStatus(data.scan_id, 'running', data.progress);
+                        break;
+                        
+                    case 'scan_completed':
+                        // Refresh data when scan completes
+                        loadDashboardData();
+                        break;
+                        
+                    case 'scan_error':
+                        console.error('Scan error:', data.error);
+                        updateScanStatus(data.scan_id, 'failed', 100);
+                        break;
+                        
+                    case 'new_alert':
+                        addNotification(data.alert);
+                        break;
+                        
+                    case 'device_update':
+                        // Refresh data when device is updated
+                        loadDashboardData();
+                        break;
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+        
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed', event);
+            if (!event.wasClean) {
+                console.log('WebSocket connection closed unexpectedly. Reconnecting...');
+                // Try to reconnect after a delay
+                setTimeout(startWebSocketConnection, 3000);
+            }
+        };
+        
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+        
+        // Keep connection alive
+        setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({type: 'ping'}));
+            }
+        }, 30000);
+        
+        // Store socket in window for global access
+        window.scannerWebSocket = socket;
+    } catch (error) {
+        console.error('Error setting up WebSocket:', error);
     }
 }

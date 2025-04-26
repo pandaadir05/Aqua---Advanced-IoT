@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fd4b8294",
+    "name": "1",
+    "target": "192.168.1.0/24",
+    "scan_type": "quick",
+    "status": "completed",
+    "progress": 100,
+    "started_at": "2025-04-26T22:16:54.465555",
+    "completed_at": "2025-04-26T22:17:15.898977",
+    "results": {
+      "devices_found": 3,
+      "vulnerabilities_found": 3,
+      "device_ids": [
+        "cd37687e",
+        "88bbe4e5",
+        "afdf0882"
+      ],
+      "vulnerability_ids": [
+        "fcf17af2",
+        "745e3aeb",
+        "184fe6f3"
+      ]
+    }
+  },
+  {
+    "id": "687edda4",
+    "name": null,
+    "target": "192.168.1.0/24",
+    "scan_type": "quick",
+    "status": "completed",
+    "progress": 100,
+    "started_at": "2025-04-26T22:21:29.958531",
+    "completed_at": "2025-04-26T22:21:51.468705",
+    "results": {
+      "devices_found": 3,
+      "vulnerabilities_found": 3,
+      "device_ids": [
+        "cd37687e",
+        "88bbe4e5",
+        "afdf0882"
+      ],
+      "vulnerability_ids": [
+        "fcf17af2",
+        "745e3aeb",
+        "184fe6f3"
+      ]
+    }
+  }
+]

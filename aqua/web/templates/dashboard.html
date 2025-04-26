@@ -9,6 +9,40 @@
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <!-- Add Three.js for 3D network visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <!-- OrbitControls from jsm path -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create a script element for OrbitControls
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js';
+            script.onload = function() {
+                console.log('OrbitControls loaded successfully');
+                // After OrbitControls is loaded, initialize the network visualization if it exists
+                if (window.networkViz && typeof THREE.OrbitControls !== 'undefined') {
+                    console.log('Initializing network visualization with OrbitControls');
+                    if (window.demoDevices && window.demoConnections) {
+                        window.networkViz.loadData(window.demoDevices, window.demoConnections);
+                    }
+                }
+            };
+            script.onerror = function() {
+                console.error('Failed to load OrbitControls');
+                // Add error message to the network visualization container
+                const container = document.getElementById('networkVisualization');
+                if (container) {
+                    container.innerHTML += `
+                        <div class="alert alert-warning m-3">
+                            <strong>Warning:</strong> Camera controls could not be loaded.
+                            The visualization may still work but without interactive controls.
+                        </div>
+                    `;
+                }
+            };
+            document.head.appendChild(script);
+        });
+    </script>
 </head>
 <body class="dashboard-body">
     <div class="wrapper">
@@ -175,19 +209,7 @@
                             </div>
                             <div class="card-body">
                                 <div id="networkVisualization" style="height: 400px; background: linear-gradient(to bottom, #1e3a5c, #12263f); border-radius: 0.5rem; position: relative; overflow: hidden;">
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJzbWFsbEdyaWQiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxNDQsIDE0NCwgMTQ0LCAwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjc21hbGxHcmlkKSIvPjwvc3ZnPg==');">
-                                    </div>
-                                    <div class="text-center text-white pt-5">
-                                        <p>Network visualization requires JavaScript 3D libraries.</p>
-                                        <p>In a real implementation, this would show an interactive network map with:</p>
-                                        <ul class="text-start mx-auto" style="max-width: 400px;">
-                                            <li>Connected IoT devices</li>
-                                            <li>Network traffic flows</li>
-                                            <li>Active threats highlighted in red</li>
-                                            <li>Vulnerable devices with warning indicators</li>
-                                            <li>Interactive tooltips with device information</li>
-                                        </ul>
-                                    </div>
+                                    <!-- 3D Visualization will be rendered here -->
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent">
@@ -475,9 +497,83 @@
         </div>
     </div>
 
+    <!-- Scan Progress Modal -->
+    <div class="modal fade" id="scanProgressModal" tabindex="-1" aria-labelledby="scanProgressModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scanProgressModalLabel">
+                        <i class="bi bi-shield-check me-2"></i>Scan in Progress
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <div class="scan-progress-circle">
+                            <div class="progress-ring">
+                                <svg>
+                                    <circle class="progress-ring-circle-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="progress-ring-circle" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="progress-text">0%</div>
+                            </div>
+                        </div>
+                        <h5 id="scanProgressText" class="mt-3">Starting scan...</h5>
+                    </div>
+
+                    <!-- Scan Steps -->
+                    <div class="scan-steps mb-4">
+                        <div class="scan-step active" data-step="1" data-label="Discovery"></div>
+                        <div class="scan-step" data-step="2" data-label="Ports"></div>
+                        <div class="scan-step" data-step="3" data-label="Vulnerabilities"></div>
+                        <div class="scan-step" data-step="4" data-label="Analysis"></div>
+                        <div class="scan-step" data-step="5" data-label="Complete"></div>
+                    </div>
+
+                    <div class="scan-info">
+                        <div class="scan-target">
+                            <strong>Target:</strong>
+                            <span id="scanProgressTarget">192.168.1.0/24</span>
+                        </div>
+                        <div class="scan-type">
+                            <strong>Type:</strong>
+                            <span id="scanProgressType">Full Scan</span>
+                        </div>
+                        <div class="scan-status">
+                            <strong>Status:</strong>
+                            <span id="scanProgressStatus">Running</span>
+                        </div>
+                        <div class="scan-time">
+                            <strong>Started:</strong>
+                            <span id="scanProgressTime">Just now</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>
+                            <i class="bi bi-terminal me-2"></i>Scan Log
+                        </h6>
+                        <div id="scanLogContainer" class="scan-log-container">
+                            <!-- Log entries will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-danger" id="cancelScanBtn">
+                        <i class="bi bi-stop-fill me-1"></i>Cancel Scan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/network-visualization.js"></script>
     
     <!-- Custom initialization script for this page -->
     <script>
@@ -723,6 +819,34 @@
             `;
             
             document.head.appendChild(style);
+        });
+
+        // Add demo data for visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Demo devices data for the 3D visualization
+            window.demoDevices = [
+                { id: "dev_1", ip: "192.168.1.101", hostname: "iot-camera-01", device_type: "camera", manufacturer: "SecurityCam", is_online: true, vulnerabilities: [{ severity: "high" }] },
+                { id: "dev_2", ip: "192.168.1.102", hostname: "smart-thermostat", device_type: "thermostat", manufacturer: "SmartHome", is_online: true, vulnerabilities: [{ severity: "medium" }] },
+                { id: "dev_3", ip: "192.168.1.103", hostname: "smart-lock", device_type: "lock", manufacturer: "SecureLock", is_online: true, vulnerabilities: [{ severity: "high" }] },
+                { id: "dev_4", ip: "192.168.1.104", hostname: "router", device_type: "router", manufacturer: "NetLink", is_online: true, vulnerabilities: [{ severity: "critical" }] },
+                { id: "dev_5", ip: "192.168.1.105", hostname: "smart-tv", device_type: "tv", manufacturer: "SmartView", is_online: true, vulnerabilities: [] },
+                { id: "dev_6", ip: "192.168.1.106", hostname: "smart-speaker", device_type: "speaker", manufacturer: "EchoTech", is_online: true, vulnerabilities: [] }
+            ];
+            
+            // Demo connections for the network visualization
+            window.demoConnections = [
+                { source: "192.168.1.101", destination: "192.168.1.104", protocol: "TCP", state: "ESTABLISHED" },
+                { source: "192.168.1.102", destination: "192.168.1.104", protocol: "TCP", state: "ESTABLISHED" },
+                { source: "192.168.1.103", destination: "192.168.1.104", protocol: "TCP", state: "ESTABLISHED" },
+                { source: "192.168.1.105", destination: "192.168.1.104", protocol: "TCP", state: "ESTABLISHED" },
+                { source: "192.168.1.106", destination: "192.168.1.104", protocol: "TCP", state: "ESTABLISHED" },
+                { source: "192.168.1.101", destination: "192.168.1.102", protocol: "UDP", state: "ESTABLISHED", isVulnerable: true }
+            ];
+            
+            // Initialize the visualization
+            if (window.networkViz) {
+                window.networkViz.loadData(window.demoDevices, window.demoConnections);
+            }
         });
     </script>
 </body>

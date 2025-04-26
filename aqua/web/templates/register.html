@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Aqua IoT Security Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        body {
+            background-color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .register-card {
+            max-width: 500px;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .register-header {
+            background-color: var(--color-primary);
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .register-body {
+            padding: 30px;
+            background-color: var(--bg-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="register-card">
+                    <div class="register-header">
+                        <h3 class="m-0">Aqua IoT Security</h3>
+                        <p class="mb-0">Create an account</p>
+                    </div>
+                    <div class="register-body">
+                        <form method="post" action="/register">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="termsCheck" name="terms" required>
+                                <label class="form-check-label" for="termsCheck">I agree to the Terms of Service and Privacy Policy</label>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                                <div class="text-center mt-2">
+                                    Already have an account? <a href="/login">Sign in</a>
+                                </div>
+                                <a href="/landing" class="btn btn-link">Back to home</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/theme-controller.js"></script>
+</body>
+</html>

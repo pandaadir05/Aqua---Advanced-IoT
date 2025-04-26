@@ -1,30 +1,33 @@
-# Python virtual environment
-venv/
-env/
-ENV/
-
-# Byte-compiled / optimized / DLL files
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Local development settings
-.env
-.vscode/
-.idea/
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
 
 # Distribution / packaging
 dist/
 build/
 *.egg-info/
 
-# Logs
+# Development environment files
+.env
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
 *.log
-logs/
+*.sqlite3
+*.db
 
-# OS specific files
+# Temporary files
 .DS_Store
-Thumbs.db
-
-# Custom
-node_modules/
+.coverage
+htmlcov/
+.pytest_cache/

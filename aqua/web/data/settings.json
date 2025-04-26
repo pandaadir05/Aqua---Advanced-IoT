@@ -1,0 +1,31 @@
+{
+  "general": {
+    "system_name": "Aqua IoT Security Platform",
+    "organization": "My Organization",
+    "timezone": "America/New_York",
+    "date_format": "MM/DD/YYYY"
+  },
+  "security": {
+    "two_factor_auth": true,
+    "session_timeout": 60,
+    "password_policy": "strong"
+  },
+  "notifications": {
+    "email_notifications": true,
+    "email_recipients": "admin@example.com"
+  },
+  "api": {
+    "enabled": true,
+    "keys": [
+      {
+        "name": "Default API Key",
+        "key": "aqu_123456789abcdef",
+        "created": "2023-10-15T00:00:00Z"
+      }
+    ]
+  },
+  "appearance": {
+    "theme": "light",
+    "accent_color": "#2c7be5"
+  }
+}

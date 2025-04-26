@@ -1,0 +1,38 @@
+[
+  {
+    "id": "fcf17af2",
+    "name": "Default Credentials",
+    "description": "Device uses default login credentials (admin/admin)",
+    "severity": "high",
+    "device_id": "cd37687e",
+    "cve_id": null,
+    "cvss_score": null,
+    "remediation": "Change the default credentials",
+    "discovered_at": "2025-04-26T22:17:15.895387",
+    "status": "open"
+  },
+  {
+    "id": "745e3aeb",
+    "name": "Unencrypted MQTT",
+    "description": "Device uses unencrypted MQTT protocol",
+    "severity": "medium",
+    "device_id": "88bbe4e5",
+    "cve_id": null,
+    "cvss_score": null,
+    "remediation": "Configure TLS for MQTT connections",
+    "discovered_at": "2025-04-26T22:17:15.895387",
+    "status": "open"
+  },
+  {
+    "id": "184fe6f3",
+    "name": "Outdated Firmware",
+    "description": "Device is running outdated firmware with known vulnerabilities",
+    "severity": "high",
+    "device_id": "afdf0882",
+    "cve_id": "CVE-2023-1234",
+    "cvss_score": 8.5,
+    "remediation": "Update to the latest firmware version",
+    "discovered_at": "2025-04-26T22:17:15.895387",
+    "status": "open"
+  }
+]
